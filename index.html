@@ -1,0 +1,3777 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeownership Readiness Tool</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <style>
+        /* --- Base & Variables --- */
+        :root {
+            --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+
+        /* --- Light Theme --- */
+        :root[data-theme="light"] {
+            --primary-color: #1a365d;
+            /* Dark Blue */
+            --primary-hover: #2c5282;
+            /* Slightly Lighter Blue */
+            --text-color: #2d3748;
+            /* Dark Gray */
+            --text-muted: #718096;
+            /* Medium Gray */
+            --page-bg: #f0f4f8;
+            /* Lighter Gray-Blue page BG */
+            --container-bg: #ffffff;
+            /* White container */
+            --card-bg: #ffffff;
+            /* White cards */
+            --card-bg-two: #eff1f3;
+            /* Lighter Gray for intro/results */
+            --input-bg: #ffffff;
+            /* White inputs */
+            --border-color: #e2e8f0;
+            /* Light Gray border */
+            --hover-color: #edf2f7;
+            /* Light Gray hover */
+            --success-color: #38a169;
+            /* Green */
+            --error-color: #c53030;
+            /* Red */
+            --warning-color: #dd6b20;
+            /* Orange for DTI */
+            --neutral-color: #718096;
+            /* Gray */
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            /* Softer shadow */
+            --shadow-lg-color: rgba(0, 0, 0, 0.12);
+            --header-bg: #1e3a5f;
+            /* Banner BG */
+            --header-text: #ffffff;
+            /* Banner Text */
+            --button-text-color: #ffffff;
+            /* Text on primary buttons */
+            --tooltip-bg: #2d3748;
+            /* Dark tooltip bg */
+            --tooltip-text: #ffffff;
+            /* White tooltip text */
+            --btt-bg: var(--primary-color);
+            --btt-hover-bg: var(--primary-hover);
+            --btt-text: #ffffff;
+        }
+
+        /* --- Dark Theme --- */
+        :root[data-theme="dark"] {
+            --primary-color: #63b3ed;
+            /* Brighter Blue */
+            --primary-hover: #90cdf4;
+            /* Even Brighter Blue hover */
+            --text-color: #e2e8f0;
+            /* Light Gray text */
+            --text-muted: #a0aec0;
+            /* Medium Gray text */
+            --page-bg: #1a202c;
+            /* Very Dark Blue/Gray background */
+            --container-bg: #2d3748;
+            /* Dark Gray/Blue container */
+            --card-bg: #2d3748;
+            /* Dark cards */
+            --card-bg-two: #1a202c;
+            /* Darker bg for intro/results */
+            --input-bg: #1a202c;
+            /* Darker inputs */
+            --border-color: #4a5568;
+            /* Gray border */
+            --hover-color: #4a5568;
+            /* Darker Gray hover */
+            --success-color: #68d391;
+            /* Lighter Green */
+            --error-color: #fc8181;
+            /* Lighter Red */
+            --warning-color: #f6ad55;
+            /* Lighter Orange */
+            --neutral-color: #a0aec0;
+            /* Lighter Gray */
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-lg-color: rgba(0, 0, 0, 0.4);
+            --header-bg: #1a202c;
+            /* Banner BG */
+            --header-text: #ffffff;
+            /* Banner Text */
+            --button-text-color: #1a202c;
+            /* Dark text on light buttons */
+            --tooltip-bg: #e2e8f0;
+            /* Light tooltip bg */
+            --tooltip-text: #1a202c;
+            /* Dark tooltip text */
+            --btt-bg: var(--primary-color);
+            --btt-hover-bg: var(--primary-hover);
+            --btt-text: #1a202c;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* --- BODY --- */
+        body {
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--page-bg);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 16px;
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            max-width: 850px;
+            /* Adjusted width */
+            margin: 0 auto 2rem auto;
+            /* Center container */
+            background-color: var(--container-bg);
+            border-radius: 0 0 12px 12px;
+            /* Rounded bottom corners */
+            box-shadow: 0 6px 12px var(--shadow-color);
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            /* Remove top border if banner is separate */
+        }
+
+        /* Separate Banner Container */
+        .banner-container {
+            max-width: 850px;
+            margin: 2rem auto 0 auto;
+            /* Top/bottom margin, center horizontally, no bottom margin to connect with container */
+            background-color: var(--header-bg);
+            /* Banner background */
+            border-radius: 12px 12px 0 0;
+            /* Rounded top corners */
+            overflow: hidden;
+            /* Clip content */
+            border: 1px solid var(--header-bg);
+            /* Match banner background */
+        }
+
+        /* --- BANNER --- */
+        .site-banner {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            text-align: center;
+        }
+
+        .banner-logo img {
+            height: 45px;
+            width: auto;
+            display: block;
+            max-width: 100%;
+        }
+
+        .banner-text {
+            font-size: clamp(1.4rem, 4vw, 1.6rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        /* --- CONTROLS AREA --- */
+        .controls-area {
+            background-color: var(--container-bg);
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .controls-area h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* --- BUTTONS --- */
+
+        /* ================== THEME VARIABLES ================== */
+        :root {
+            --primary-color: #2563eb;
+            /* Blue-600 */
+            --primary-hover: #3b82f6;
+            /* Blue-500 */
+            --text-color: #111827;
+            /* Gray-900 */
+            --bg-color: #ffffff;
+            /* White */
+            --border-color: #d1d5db;
+            /* Gray-300 */
+        }
+
+        :root[data-theme="dark"] {
+            --primary-color: #63b3ed;
+            /* Light blue for dark mode */
+            --primary-hover: #90cdf4;
+            --text-color: #f9fafb;
+            /* Light gray for text */
+            --bg-color: #1f2937;
+            /* Gray-800 */
+            --border-color: #374151;
+            /* Gray-700 */
+        }
+
+
+        .btn,
+        button.progress-step,
+        .button-container button {
+            /* Target all button types */
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            background-color: var(--primary-color);
+            color: var(--button-text-color);
+            font-size: 0.8rem;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            justify-content: center;
+            /* Center text/icon */
+        }
+
+
+
+
+        .btn:hover,
+        button.progress-step:hover,
+        .button-container button:hover,
+        .btn:focus-visible,
+        button.progress-step:focus-visible,
+        .button-container button:focus-visible {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: var(--button-text-color);
+            outline: none;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            transform: translateY(-1px);
+        }
+
+        .btn svg {
+            width: 1em;
+            height: 1em;
+        }
+
+        /* Light Theme Button Colors */
+        :root[data-theme="light"] .btn,
+        :root[data-theme="light"] button.progress-step,
+        :root[data-theme="light"] .button-container button {
+            border-color: grey;
+        }
+
+        :root[data-theme="light"] .btn.pdf-export-btn {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: #fff;
+        }
+
+        :root[data-theme="light"] .btn.pdf-export-btn:hover {
+            background-color: #2f855a;
+            border-color: #2f855a;
+        }
+
+        :root[data-theme="light"] .theme-toggle {
+            border-color: var(--primary-color);
+            background-color: transparent;
+            color: var(--primary-color);
+        }
+
+        :root[data-theme="light"] .theme-toggle:hover {
+            background-color: var(--primary-color);
+            color: var(--button-text-color);
+            border-color: var(--primary-color);
+        }
+
+        :root[data-theme="light"] .back-button {
+            background-color: var(--neutral-color);
+            border-color: var(--neutral-color);
+            color: #fff;
+        }
+
+        :root[data-theme="light"] .back-button:hover {
+            background-color: #4a5568;
+            border-color: #4a5568;
+        }
+
+
+        /* Progress steps default light theme */
+        :root[data-theme="light"] .progress-step {
+            background-color: transparent;
+            border-color: transparent;
+            color: var(--text-muted);
+        }
+
+        :root[data-theme="light"] .progress-step.active {
+            background-color: transparent;
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        :root[data-theme="light"] .progress-step:hover:not(.active) {
+            background-color: var(--hover-color);
+            color: var(--primary-color);
+            border-color: transparent;
+        }
+
+        .help-button,
+        .glossary-button {
+            background-color: grey;
+            border: 2px solid var(--border-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .help-button:hover,
+        .glossary-button:hover {
+            background-color: #6c757d;
+            border-color: var(--primary-hover);
+            color: white;
+        }
+
+
+        /* Dark Theme Button Colors */
+        /* === DARK MODE SPECIAL OVERRIDE FOR FAQ & GLOSSARY BUTTONS === */
+        :root[data-theme="dark"] .help-button,
+        :root[data-theme="dark"] .glossary-button {
+            background-color: transparent;
+            border: 2px solid #ffffff;
+            /* White border */
+            color: #ffffff;
+            /* White text */
+        }
+
+        :root[data-theme="dark"] .help-button:hover,
+        :root[data-theme="dark"] .glossary-button:hover {
+            background-color: rgba(99, 179, 237, 0.1);
+            border-color: var(--primary-hover);
+            color: var(--primary-hover);
+        }
+
+        :root[data-theme="dark"] .btn,
+        :root[data-theme="dark"] button.progress-step,
+        :root[data-theme="dark"] .button-container button {
+            color: var(--button-text-color);
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        :root[data-theme="dark"] .btn:hover,
+        :root[data-theme="dark"] button.progress-step:hover,
+        :root[data-theme="dark"] .button-container button:hover,
+        :root[data-theme="dark"] .btn:focus-visible,
+        :root[data-theme="dark"] button.progress-step:focus-visible,
+        :root[data-theme="dark"] .button-container button:focus-visible {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: var(--button-text-color);
+        }
+
+        :root[data-theme="dark"] .btn.pdf-export-btn {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: #1a202c;
+        }
+
+        :root[data-theme="dark"] .btn.pdf-export-btn:hover {
+            background-color: #9ae6b4;
+            border-color: #9ae6b4;
+            color: #1a202c;
+        }
+
+        :root[data-theme="dark"] .theme-toggle {
+            border-color: var(--primary-color);
+            background-color: transparent;
+            color: var(--primary-color);
+        }
+
+        :root[data-theme="dark"] .theme-toggle:hover {
+            background-color: var(--primary-hover);
+            color: var(--button-text-color);
+            border-color: var(--primary-hover);
+        }
+
+        :root[data-theme="dark"] .back-button {
+            background-color: var(--neutral-color);
+            border-color: var(--neutral-color);
+            color: #1a202c;
+        }
+
+        :root[data-theme="dark"] .back-button:hover {
+            background-color: #e2e8f0;
+            border-color: #e2e8f0;
+        }
+
+
+        /* Progress steps default dark theme */
+        :root[data-theme="dark"] .progress-step {
+            background-color: transparent;
+            border-color: transparent;
+            color: var(--text-muted);
+        }
+
+        :root[data-theme="dark"] .progress-step.active {
+            background-color: transparent;
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        :root[data-theme="dark"] .progress-step:hover:not(.active) {
+            background-color: var(--hover-color);
+            color: var(--primary-hover);
+            border-color: transparent;
+        }
+
+
+        /* Main Content & Layout */
+        .layout {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .main-content {
+            flex: 3;
+            min-width: 0;
+        }
+
+        .sidebar {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px var(--shadow-color);
+            height: fit-content;
+            border: 1px solid var(--border-color);
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .sidebar p {
+            margin: 0.75rem 0;
+            font-size: 0.95em;
+            color: var(--text-muted);
+        }
+
+        .sidebar strong {
+            color: var(--text-color);
+        }
+
+        .sidebar hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 1rem 0;
+        }
+
+        /* Progress Tracker & Bar */
+        .progress-tracker {
+            display: flex;
+            justify-content: space-around;
+            /* Distribute space */
+            margin: 0;
+            padding: 0.5rem 1rem;
+            /* Reduced vertical, added horizontal padding */
+            background: var(--container-bg);
+            /* Match container background */
+            border-bottom: 1px solid var(--border-color);
+            gap: 0.5rem;
+            /* Add gap between buttons */
+        }
+
+        .progress-step {
+            flex: 1 1 0;
+            /* Allow shrinking and growing from a base of 0 */
+            max-width: 200px;
+            /* Prevent steps from becoming too wide */
+            padding: 0.6rem 0.5rem;
+            text-align: center;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            outline: none;
+            color: var(--text-muted);
+            font-size: 0.85em;
+            /* Slightly smaller */
+            font-weight: 500;
+            background-color: transparent;
+            /* Ensure transparent base */
+            transition: color 0.3s ease, border-color 0.3s ease, background-color 0.2s ease;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+            /* Prevent text overflow issues */
+            text-overflow: ellipsis;
+            /* Show ellipsis if text too long */
+            border-radius: 6px 6px 0 0;
+            /* Match button radius slightly */
+            margin: 0;
+            /* Remove button default margin */
+        }
+
+        .progress-step.active {
+            border-color: var(--success-color);
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .progress-step:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: var(--hover-color);
+        }
+
+        progress#completionBar {
+            display: block;
+            width: calc(100% - 3rem);
+            /* Keep side margins */
+            height: 10px;
+            /* Slightly thicker */
+            margin: 1.5rem auto;
+            /* Increased vertical margin */
+            appearance: none;
+            -webkit-appearance: none;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        progress#completionBar::-webkit-progress-bar {
+            background-color: var(--card-bg-two);
+            border-radius: 5px;
+        }
+
+        progress#completionBar::-webkit-progress-value {
+            background-color: var(--success-color);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        progress#completionBar::-moz-progress-bar {
+            background-color: var(--success-color);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Card Sections */
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            /* Slightly reduced */
+            border-radius: 8px;
+            box-shadow: 0 1px 4px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .card.hidden {
+            display: none;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            font-size: 1.4em;
+        }
+
+        /* Forms & Inputs */
+        fieldset {
+            border: none;
+            margin: 0 0 1rem 0;
+            padding: 0;
+        }
+
+        .question {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.95em;
+        }
+
+        select,
+        input[type="number"],
+        input[type="range"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 8px;
+            cursor: pointer;
+        }
+
+        select {
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23718096%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: .65em auto;
+            padding-right: 2rem;
+            cursor: pointer;
+        }
+
+        [data-theme="dark"] select {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0aec0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 0.5rem 1rem;
+        }
+
+        .input-group label {
+            font-weight: 500;
+            flex-basis: 180px;
+            flex-shrink: 0;
+            padding-right: 0.5rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .input-group .tooltip-wrapper {
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            min-width: 150px;
+            gap: 0.5rem;
+        }
+
+        .input-group .tooltip-wrapper input {
+            flex-grow: 1;
+            max-width: 100%;
+        }
+
+        .info-tooltip {
+            position: relative;
+            cursor: help;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.4em;
+            height: 1.4em;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            line-height: 1;
+            margin-left: 0;
+            order: 1;
+        }
+
+        .info-tooltip::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            transform-origin: bottom center;
+            padding: 0.5rem 0.75rem;
+            background: var(--tooltip-bg);
+            color: var(--tooltip-text);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            width: max-content;
+            max-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            z-index: 10;
+            text-align: center;
+            line-height: 1.4;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+
+        .info-tooltip:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Details/Summary (Accordion) */
+        details {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            background: var(--card-bg-two);
+        }
+
+        details summary {
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::after {
+            content: '+';
+            font-size: 1.2em;
+            transition: transform 0.2s ease;
+        }
+
+        details[open] summary::after {
+            content: '−';
+        }
+
+        details>div {
+            padding: 0 1rem 1rem 1rem;
+        }
+
+        details p {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Validation styles */
+        select.valid,
+        input.valid {
+            border-color: var(--success-color);
+            border-width: 2px;
+        }
+
+        select.invalid,
+        input.invalid {
+            border-color: var(--error-color);
+            border-width: 2px;
+        }
+
+        /* DTI Status Text */
+        #dtiStatus {
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        #dtiStatus.green {
+            color: var(--success-color);
+        }
+
+        #dtiStatus.yellow {
+            color: var(--warning-color);
+        }
+
+        #dtiStatus.red {
+            color: var(--error-color);
+        }
+
+        /* Button container */
+        .button-container {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Results Display */
+        .results-display {
+            background-color: var(--card-bg-two);
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+            text-align: left;
+            font-size: 0.95em;
+            display: none;
+            line-height: 1.7;
+        }
+
+        .results-display h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.2em;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .results-display p {
+            margin: 0.5rem 0;
+            color: var(--text-muted);
+        }
+
+        .results-display strong {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .results-display ul {
+            padding-left: 20px;
+            margin-top: 0.75rem;
+            list-style: disc;
+        }
+
+        .results-display li {
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* Help/Glossary Side Panels */
+        .help-section,
+        .glossary-section {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 90%;
+            max-width: 400px;
+            height: 100vh;
+            background: var(--container-bg);
+            padding: 1.5rem;
+            box-shadow: -2px 0 10px var(--shadow-color);
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1001;
+            transform: translateX(100%);
+        }
+
+        .help-section.active,
+        .glossary-section.active {
+            transform: translateX(0);
+            right: 0;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+            padding: 0;
+        }
+
+        .close-button:hover {
+            color: var(--text-color);
+        }
+
+        .help-section h2,
+        .glossary-section h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            /* Align input and button if needed */
+            align-items: center;
+            /* Vertically align */
+            margin-bottom: 0;
+            /* Override default input margin if needed inside wrapper */
+        }
+
+        .search-wrapper .search-box {
+            /* Add padding to prevent text from going under the button */
+            padding-right: 2.5rem;
+            /* Adjust as needed */
+            flex-grow: 1;
+            /* Make input take available space */
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: 0px;
+            /* Position relative to the right edge of the wrapper */
+            top: 50%;
+            transform: translateY(-50%);
+            /* Precise vertical centering */
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0 0.75rem;
+            /* Adjust horizontal padding for click area */
+            line-height: 0;
+            /* Prevent extra space due to line height */
+            display: flex;
+            /* Use flex to center SVG inside button */
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            /* Make button height match input height potentially */
+        }
+
+        .clear-search-btn:hover,
+        .clear-search-btn:focus {
+            color: var(--text-color);
+            outline: none;
+            color: var(--error-color);
+        }
+
+        .clear-search-btn svg {
+            width: 1.1em;
+            /* Slightly smaller width */
+            height: 1.1em;
+            /* Slightly smaller height */
+            display: block;
+            /* Prevents potential extra space below SVG */
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.6rem;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .faq-item,
+        .glossary-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .faq-item h3,
+        .glossary-term {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.05em;
+        }
+
+        .faq-item p,
+        .glossary-definition {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            margin: 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 0;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9em;
+            color: var(--text-muted);
+            background-color: var(--container-bg);
+        }
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Back to Top Button */
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--btt-bg);
+            color: var(--btt-text);
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--shadow-lg-color);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #back-to-top .arrow {
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+        #back-to-top.visible {
+            opacity: 0.9;
+            visibility: visible;
+        }
+
+        #back-to-top:hover {
+            background-color: var(--btt-hover-bg);
+            transform: translateX(-50%) scale(1.05);
+            opacity: 1;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 1.5rem;
+            z-index: 1002;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        /* Accessibility helper */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 850px) {
+            .container {
+                margin: 1rem;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                font-size: 15px;
+            }
+
+            .container {
+                border-radius: 0;
+                margin: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            main#content {
+                padding: 1.5rem 1rem;
+            }
+
+            .layout {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .sidebar {
+                flex-basis: auto;
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .calc-section h1 {
+                font-size: 1.5em;
+            }
+
+            .calc-section h2 {
+                font-size: 1.25em;
+            }
+
+            .input-group label {
+                flex-basis: 100%;
+                text-align: left;
+                margin-bottom: 0.25rem;
+            }
+
+            .input-group .tooltip-wrapper {
+                flex-basis: 100%;
+            }
+
+            .info-tooltip {
+                order: 1;
+                margin-left: 0.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-area {
+                justify-content: space-between;
+                padding: 0.75rem 1rem;
+            }
+
+            .controls-area h1 {
+                font-size: 1.2rem;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .footer {
+                padding: 1rem;
+            }
+
+            #back-to-top {
+                font-size: 0.85rem;
+                padding: 6px 15px;
+                bottom: 15px;
+            }
+
+            .help-section,
+            .glossary-section {
+                width: 100%;
+                max-width: none;
+                right: -100%;
+                transform: translateX(100%);
+            }
+
+            .help-section.active,
+            .glossary-section.active {
+                transform: translateX(0);
+            }
+
+            /* Stack progress steps vertically on mobile */
+            .progress-tracker {
+                flex-direction: column;
+                gap: 0.25rem;
+                padding: 0.5rem;
+            }
+
+            .progress-step {
+                border-bottom-width: 2px;
+                font-size: 0.9em;
+            }
+
+            progress#completionBar {
+                width: calc(100% - 2rem);
+                margin: 1rem auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .site-banner {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 15px;
+            }
+
+            .banner-logo img {
+                height: 40px;
+            }
+
+            .banner-text {
+                font-size: 1.2rem;
+            }
+
+            .input-group label {
+                text-align: left;
+            }
+
+            .input-group {
+                gap: 0.25rem;
+            }
+
+            .controls-area {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+
+            /* Increased gap */
+            .controls-area h1 {
+                text-align: center;
+            }
+
+            .control-buttons {
+                width: 100%;
+                display: flex;
+                justify-content: space-around;
+            }
+
+            .btn,
+            button {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.8rem;
+            }
+
+            .progress-step {
+                font-size: 0.8em;
+            }
+
+            .calc-section {
+                padding: 1rem;
+            }
+        }
+
+
+        /* --- PRINT STYLES (E-book Look - Summary Refined) --- */
+
+
+        /* --- Add/Update Dark Theme Variables --- */
+        :root[data-theme="dark"] {
+            /* ... other dark variables ... */
+            --warning-color: #f6ad55;
+            /* Lighter Orange */
+            --success-color: #68d391;
+            /* Lighter Green */
+            --error-color: #fc8181;
+            /* Lighter Red */
+            --neutral-color: #a0aec0;
+            /* Lighter Gray for chart */
+            --card-bg-two: #1f2937;
+            /* Darker bg for results box if different */
+        }
+
+        /* --- Updated Affordability Results Display --- */
+        #affordabilityResult {
+            background-color: var(--card-bg-two);
+            /* Use secondary card background */
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            /* More space above */
+            border: 1px solid var(--border-color);
+            text-align: left;
+            font-size: 1rem;
+            /* Slightly larger base font */
+            line-height: 1.8;
+            /* Better spacing */
+            display: none;
+            /* Keep hidden initially */
+        }
+
+        #affordabilityResult h3 {
+            color: var(--primary-color);
+            margin: 0 0 1.25rem 0;
+            /* Increased spacing below */
+            font-size: 1.3em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        #affordabilityResult p {
+            margin: 0.75rem 0;
+            /* Increased spacing between lines */
+            color: var(--text-muted);
+            display: flex;
+            /* Use flex for alignment */
+            justify-content: space-between;
+            /* Space label and value */
+            flex-wrap: wrap;
+            /* Allow wrapping */
+            align-items: center;
+            /* Vertically align items */
+            border-bottom: 1px dotted var(--border-color);
+            /* Subtle separator */
+            padding-bottom: 0.75rem;
+        }
+
+        #affordabilityResult p:last-of-type {
+            border-bottom: none;
+            /* No border on last item */
+            padding-bottom: 0;
+        }
+
+
+        #affordabilityResult strong {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-left: 0.5rem;
+            /* Space before value */
+            text-align: right;
+            /* Align value to the right */
+        }
+
+        /* Remove horizontal rule, using border on <p> instead */
+        /* #affordabilityResult hr { display: none; } */
+
+        #affordabilityResult p small {
+            display: block;
+            width: 100%;
+            text-align: center;
+            /* Center small text */
+            margin-top: 1rem;
+            /* Space above small text */
+            font-size: 0.85em;
+            color: var(--text-muted);
+            border-top: 1px dashed var(--border-color);
+            /* Separator above */
+            padding-top: 0.75rem;
+            justify-content: center;
+            /* Center the small text block */
+        }
+
+        /* DTI status color classes - Apply to the <strong> tag */
+        #affordabilityResult strong.green {
+            color: var(--success-color) !important;
+        }
+
+        /* Use important if needed */
+        #affordabilityResult strong.yellow {
+            color: var(--warning-color) !important;
+        }
+
+        #affordabilityResult strong.red {
+            color: var(--error-color) !important;
+        }
+
+        #affordabilityResult .button-container {
+            margin-top: 2rem;
+            /* More space before button */
+            justify-content: center;
+        }
+
+        /* --- Updated Charts Layout --- */
+        #affordabilityCharts {
+            display: grid;
+            /* Use grid for responsive layout */
+            grid-template-columns: 1fr;
+            /* Default: stack charts vertically */
+            gap: 2.5rem;
+            /* Increase gap between charts */
+            margin-top: 2.5rem;
+            /* Space above charts container */
+            padding-top: 2rem;
+            /* Padding inside */
+            border-top: 1px solid var(--border-color);
+            /* Separator line */
+            display: none;
+            /* Keep hidden initially */
+        }
+
+        /* Make charts side-by-side on larger screens */
+        @media (min-width: 768px) {
+            #affordabilityCharts {
+                grid-template-columns: 1fr 1fr;
+                /* Two equal columns */
+            }
+        }
+
+        .chart-section {
+            /* Styles for individual chart wrappers */
+            background-color: var(--card-bg);
+            /* Match card bg */
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-section h3 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            /* More space below title */
+            color: var(--primary-color);
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            /* Adjust height - make it consistent */
+            height: 300px;
+            /* Or use aspect-ratio */
+            width: 100%;
+        }
+
+        /* --- PRINT STYLES (Professional PDF Report - Summary Only via CSS) --- */
+        @media print {
+
+            /* --- Page Setup --- */
+            @page {
+                size: letter portrait;
+                margin: 0.75in;
+            }
+
+            /* --- Base Body & Font --- */
+            body {
+                font-family: 'Times New Roman', Times, serif !important;
+                font-size: 11pt !important;
+                line-height: 1.5 !important;
+                color: #000000 !important;
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                widows: 3;
+                orphans: 3;
+            }
+
+            /* --- Hide ALL UI & Web Elements ALWAYS during print --- */
+            .banner-container,
+            .controls-area,
+            .progress-tracker,
+            progress#completionBar,
+            .sidebar,
+            .footer,
+            button,
+            .btn,
+            #back-to-top,
+            .info-tooltip,
+            .help-section,
+            .glossary-section,
+            .chart-container,
+            #affordabilityCharts,
+            canvas,
+            .hide-for-pdf,
+            .loading-overlay,
+            #dtiStatus,
+            .results-display .button-container,
+            .tooltip-wrapper,
+            details summary::before,
+            details summary::after,
+            select,
+            input[type="number"],
+            input[type="text"] {
+                display: none !important;
+                visibility: hidden !important;
+                position: absolute !important;
+                left: -9999px !important;
+            }
+
+            /* --- Reset Layout & Container --- */
+            .container,
+            .layout,
+            .main-content {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: none !important;
+                border-radius: 0 !important;
+                display: block !important;
+                flex: none !important;
+            }
+
+            /* === CSS-Driven Hiding/Showing of Stages === */
+            /* Hide ALL main content stages by default in print */
+            .main-content>section.card {
+                display: none !important;
+                margin: 0 !important;
+                /* Reset margin when hidden */
+                padding: 0 !important;
+                /* Reset padding when hidden */
+            }
+
+            /* ONLY show the #summary section when the body has the special class */
+            body.printing-summary-only section#summary {
+                display: block !important;
+                /* Override the default hiding */
+                margin: 0 0 24pt 0 !important;
+                /* Apply margin ONLY when visible */
+                padding: 0 !important;
+                /* Keep padding reset */
+                box-shadow: none !important;
+                border: none !important;
+                background: none !important;
+                page-break-before: auto;
+                page-break-inside: avoid;
+            }
+
+            /* Remove margin from summary if it's the only thing */
+            body.printing-summary-only section#summary:last-child {
+                margin-bottom: 0 !important;
+            }
+
+
+            /* --- Main Summary Section Heading (h2) --- */
+            /* Applied only when #summary is visible via the body class */
+            body.printing-summary-only section#summary>h2 {
+                font-size: 16pt !important;
+                font-weight: bold;
+                color: #000 !important;
+                border-bottom: 1.5px solid #000 !important;
+                padding-bottom: 6pt !important;
+                margin: 0 0 18pt 0 !important;
+                page-break-after: avoid;
+                text-align: left;
+                font-family: 'Times New Roman', Times, serif !important;
+            }
+
+            /* --- Hide Details/Summary/Input Groups in Summary (they don't exist there) --- */
+            /* These rules ensure Stage 1 print styles don't accidentally apply */
+            body.printing-summary-only section#summary details,
+            body.printing-summary-only section#summary .input-group {
+                display: none !important;
+                /* Summary doesn't use these structures */
+            }
+
+            /* --- Results Display Styling (for #summaryContent, #actionItems) --- */
+            /* Applied only when #summary is visible via the body class */
+            body.printing-summary-only .results-display {
+                border: none !important;
+                border-top: 1px dotted #888 !important;
+                padding: 12pt 0 !important;
+                margin: 18pt 0 !important;
+                background-color: transparent !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid;
+                display: block !important;
+            }
+
+            /* Remove top border for the FIRST results block within the summary */
+            body.printing-summary-only section#summary>.results-display:first-of-type {
+                border-top: none !important;
+                margin-top: 0 !important;
+            }
+
+            body.printing-summary-only .results-display h3 {
+                font-size: 13pt !important;
+                margin: 0 0 10pt 0 !important;
+                font-weight: bold;
+                color: #000 !important;
+                border-bottom: none !important;
+                padding-bottom: 0 !important;
+                font-family: 'Times New Roman', Times, serif !important;
+                text-align: left;
+                page-break-after: avoid;
+            }
+
+            body.printing-summary-only .results-display p {
+                font-size: 11pt !important;
+                color: #000 !important;
+                margin: 0 0 9pt 0;
+                text-align: left !important;
+                line-height: 1.5;
+                display: block !important;
+                font-family: 'Times New Roman', Times, serif !important;
+            }
+
+            body.printing-summary-only .results-display p strong {
+                font-weight: bold;
+                color: #000;
+                padding-right: 0;
+            }
+
+            body.printing-summary-only .results-display p small {
+                display: block;
+                width: 100%;
+                text-align: left;
+                margin-top: 6pt;
+                font-size: 9pt;
+                color: #333 !important;
+                border: none;
+                padding: 0;
+                font-style: italic;
+                line-height: 1.3;
+            }
+
+            body.printing-summary-only .results-display ul {
+                padding-left: 20pt !important;
+                margin: 8pt 0 !important;
+                list-style-type: disc !important;
+            }
+
+            body.printing-summary-only .results-display li {
+                font-size: 11pt;
+                margin-bottom: 6pt !important;
+                color: #000 !important;
+                text-align: left !important;
+                font-family: 'Times New Roman', Times, serif !important;
+                line-height: 1.5;
+            }
+
+            body.printing-summary-only .results-display li::marker {
+                color: #000 !important;
+            }
+
+            /* --- Links --- */
+            a {
+                color: #000 !important;
+                text-decoration: underline !important;
+            }
+
+            a[href^="#"]::after,
+            a.internal-link::after {
+                content: "" !important;
+            }
+
+            a[href^="http"]::after,
+            a[href^="https"]::after {
+                content: " (" attr(href) ")";
+                font-size: 9pt;
+                font-style: italic;
+                color: #444 !important;
+                word-break: break-all;
+            }
+
+        }
+
+        /* End @media print */
+    </style>
+</head>
+
+<body>
+    <!-- Loading Indicator -->
+    <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite">Loading...</div>
+
+    <!-- Wrap banner and controls in the main container -->
+    <div class="banner-container"> <!-- New Wrapper for Banner -->
+        <div class="site-banner">
+            <div class="banner-logo">
+                <img src="https://static.wixstatic.com/media/c24a60_577eb503a3c1402b846b9ec4a2afd46e~mv2.png" alt="My College Finance Logo">
+            </div>
+            <h2 class="banner-text">My College Finance</h2>
+        </div>
+    </div>
+
+    <div class="container"> <!-- Existing container for content below banner -->
+
+        <!-- Controls Area -->
+        <div class="controls-area">
+            <h1>Homeownership Readiness</h1> <!-- Moved Title Here -->
+            <div class="control-buttons"> <!-- Wrapper for buttons -->
+                <button class="btn help-button">FAQs</button>
+                <button class="btn glossary-button">Glossary</button>
+                <button class="btn theme-toggle" aria-label="Toggle Dark/Light Theme">Theme</button>
+                <button class="btn pdf-export-btn" aria-label="Download Page as PDF">
+                    <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                    </svg>
+                    Download PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <h2 id="progressTrackerTitle" class="sr-only">Progress Tracker</h2>
+        <div class="progress-tracker" id="progressTracker" aria-labelledby="progressTrackerTitle">
+            <button class="progress-step active" data-step="1">1. Checklist</button>
+            <button class="progress-step" data-step="2">2. Affordability</button>
+            <button class="progress-step" data-step="3">3. Loan Quiz</button>
+            <button class="progress-step" data-step="4">4. Summary</button>
+        </div>
+        <progress id="completionBar" value="25" max="100" aria-labelledby="progressTracker"></progress>
+
+
+        <div class="layout">
+            <!-- Main Content Area -->
+            <main class="main-content" id="mainContent">
+
+                <!-- Stage 1: Readiness Checklist -->
+                <section id="stage1" class="card">
+                    <h2>Stage 1: Readiness Checklist</h2>
+                    <form id="checklistForm" aria-label="Homeownership Readiness Checklist">
+                        <fieldset>
+                            <legend class="sr-only">Income and Employment Stability</legend>
+                            <details open>
+                                <summary>Income & Employment Stability</summary>
+                                <div> <!-- Added wrapper -->
+                                    <div class="question">
+                                        <label for="job">Stable job or consistent income?</label>
+                                        <div class="tooltip-wrapper"><select name="job" id="job" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Lenders prefer consistent income sources for loan approval.">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="employment">Employed 2+ years in the same field?</label>
+                                        <div class="tooltip-wrapper"><select name="employment" id="employment" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Consistent employment history shows financial stability to lenders.">ⓘ</span></div>
+                                    </div>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="sr-only">Credit Score and Debt Management</legend>
+                            <details open>
+                                <summary>Credit Score & Debt Management</summary>
+                                <div> <!-- Added wrapper -->
+                                    <div class="question">
+                                        <label for="creditScore">Credit score at least 620?</label>
+                                        <div class="tooltip-wrapper"><select name="creditScore" id="creditScore" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes (620+)</option>
+                                                <option value="no">No (Below 620)</option>
+                                            </select><span class="info-tooltip" data-tooltip="Higher scores generally qualify for better loan terms. 620 is often a minimum for conventional loans.">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="monthlyIncome">Monthly Gross Income ($):</label>
+                                        <div class="tooltip-wrapper"><input type="number" id="monthlyIncome" required aria-required="true" placeholder="e.g., 5000" min="0"><span class="info-tooltip" data-tooltip="Your total income before taxes and deductions.">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="monthlyDebt">Total Monthly Debt Payments ($):</label>
+                                        <div class="tooltip-wrapper"><input type="number" id="monthlyDebt" required aria-required="true" placeholder="e.g., 1500" min="0"><span class="info-tooltip" data-tooltip="Sum of all minimum monthly debt payments (loans, credit cards, etc., excluding rent/utilities).">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="dtiResult">Debt-to-Income (DTI) Ratio:</label>
+                                        <div class="tooltip-wrapper"><input type="text" id="dtiResult" readonly aria-live="polite"><span class="info-tooltip" data-tooltip="Your total monthly debt divided by your gross monthly income. Lower is better (ideally below 43%).">ⓘ</span></div>
+                                        <p id="dtiStatus" aria-live="polite"></p> <!-- Status message -->
+                                    </div>
+                                    <div class="question">
+                                        <label for="bills">Pay bills on time & manage credit well?</label>
+                                        <div class="tooltip-wrapper"><select name="bills" id="bills" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="A good payment history and low credit utilization are crucial for your credit score.">ⓘ</span></div>
+                                    </div>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="sr-only">Savings and Down Payment</legend>
+                            <details open>
+                                <summary>Savings & Down Payment</summary>
+                                <div> <!-- Added wrapper -->
+                                    <div class="question">
+                                        <label for="downpayment">Saved 3-5%+ for down payment?</label>
+                                        <div class="tooltip-wrapper"><select name="downpayment" id="downpayment" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Minimum down payment varies by loan type (e.g., 3.5% FHA, 3-5% Conventional, 0% VA/USDA). 20% avoids PMI on conventional loans.">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="closingCosts">Saved 2-5% for closing costs?</label>
+                                        <div class="tooltip-wrapper"><select name="closingCosts" id="closingCosts" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Fees paid at closing (appraisal, title insurance, etc.). Separate from down payment.">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="emergency">Have 3-6 months emergency savings?</label>
+                                        <div class="tooltip-wrapper"><select name="emergency" id="emergency" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Covers unexpected expenses after buying, separate from down payment/closing costs.">ⓘ</span></div>
+                                    </div>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="sr-only">Understanding Monthly Costs</legend>
+                            <details open>
+                                <summary>Understanding Monthly Costs</summary>
+                                <div> <!-- Added wrapper -->
+                                    <div class="question">
+                                        <label for="monthlyCosts">Estimated monthly PITI + Utilities?</label>
+                                        <div class="tooltip-wrapper"><select name="monthlyCosts" id="monthlyCosts" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="PITI = Principal, Interest, Taxes, Insurance. Have you realistically estimated ALL monthly housing costs?">ⓘ</span></div>
+                                    </div>
+                                    <div class="question">
+                                        <label for="maintenance">Budgeted for home maintenance?</label>
+                                        <div class="tooltip-wrapper"><select name="maintenance" id="maintenance" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Plan for ~1% of home value annually for repairs/upkeep (e.g., $3000/yr for a $300k home).">ⓘ</span></div>
+                                    </div>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend class="sr-only">First-Time Homebuyer Programs</legend>
+                            <details open>
+                                <summary>Homebuyer Programs & Education</summary>
+                                <div> <!-- Added wrapper -->
+                                    <div class="question">
+                                        <label for="programsAwareness">Researched assistance programs?</label>
+                                        <div class="tooltip-wrapper"><select name="programsAwareness" id="programsAwareness" required aria-required="true">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Look into state/local programs, FHA, VA, USDA for potential down payment or closing cost help.">ⓘ</span></div>
+                                    </div>
+                                    <div class="question"> <!-- Optional but good -->
+                                        <label for="education">Completed homebuyer education?</label>
+                                        <div class="tooltip-wrapper"><select name="education" id="education">
+                                                <option value="">Select</option>
+                                                <option value="yes">Yes</option>
+                                                <option value="no">No</option>
+                                            </select><span class="info-tooltip" data-tooltip="Many assistance programs require a homebuyer education course. It's beneficial regardless!">ⓘ</span></div>
+                                    </div>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <fieldset> <!-- Moved Glossary Button Here -->
+                            <legend class="sr-only">Glossary Access</legend>
+                            <details>
+                                <summary>Need Help with Terms?</summary>
+                                <div>
+                                    <p>Click the button below to open the glossary and understand terms like DTI, PMI, FHA, etc.</p>
+                                    <button type="button" class="btn glossary-button">Open Glossary</button>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <div class="button-container">
+                            <button type="button" class="btn" id="checklistNextBtn">Next: Calculate Readiness Score</button>
+                            <button type="button" class="btn back-button" id="checklistResetBtn">Reset Form</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Stage 2: Mortgage Affordability Calculator -->
+                <section id="stage2" class="card hidden">
+                    <h2>Stage 2: Mortgage Affordability Calculator</h2>
+                    <form id="affordabilityForm" aria-label="Mortgage Affordability Calculator">
+                        <div class="calculator-inputs">
+                            <!-- ... (Keep input-groups as before) ... -->
+                            <div class="input-group">
+                                <label for="income">Monthly Gross Income ($):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="income" required aria-required="true" min="0" placeholder="e.g., 5000"><span class="info-tooltip" data-tooltip="Your total income before taxes and deductions.">ⓘ</span></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="debt">Total Monthly Debt Payments ($):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="debt" required aria-required="true" min="0" placeholder="e.g., 1000"><span class="info-tooltip" data-tooltip="Minimum payments on loans, credit cards, etc. (exclude rent/utilities).">ⓘ</span></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="downPaymentAmount">Down Payment Amount ($):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="downPaymentAmount" required aria-required="true" min="0" placeholder="e.g., 15000"><span class="info-tooltip" data-tooltip="The cash you plan to put down.">ⓘ</span></div>
+                            </div>
+                            <div class="input-group"> <!-- Added Home Price Input -->
+                                <label for="homePrice">Estimated Home Price ($):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="homePrice" required aria-required="true" min="0" placeholder="e.g., 300000"><span class="info-tooltip" data-tooltip="The estimated purchase price of the home.">ⓘ</span></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="interestRate">Estimated Interest Rate (%):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="interestRate" required aria-required="true" min="1" max="15" step="0.1" placeholder="e.g., 6.5"><span class="info-tooltip" data-tooltip="Current approximate mortgage rate for your credit profile.">ⓘ</span></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="loanTerm">Loan Term (Years):</label>
+                                <div class="tooltip-wrapper">
+                                    <select id="loanTerm" required aria-required="true">
+                                        <option value="" disabled selected hidden>Select Loan Term...</option>
+                                        <option value="30">30 Years</option>
+                                        <option value="15">15 Years</option>
+                                    </select>
+
+                                    <span class="info-tooltip" data-tooltip="Length of the mortgage loan (30 or 15 years typically).">ⓘ</span>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="taxInsurance">Est. Monthly Tax & Insurance ($):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="taxInsurance" required aria-required="true" min="0" placeholder="e.g., 350"><span class="info-tooltip" data-tooltip="Estimated Property Taxes + Homeowners Insurance per month (often escrowed).">ⓘ</span></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="hoa">Est. Monthly HOA Fees ($):</label>
+                                <div class="tooltip-wrapper"><input type="number" id="hoa" min="0" placeholder="e.g., 50" value="0"><span class="info-tooltip" data-tooltip="Homeowners Association fees, if applicable. Enter 0 if none.">ⓘ</span></div>
+                            </div>
+                        </div>
+                        <div class="button-container">
+                            <button type="button" class="btn" id="calculateAffordabilityBtn">Calculate Affordability</button>
+                            <button type="button" class="btn back-button" id="affordabilityBackBtn">Back</button>
+                            <button type="button" class="btn back-button" id="affordabilityResetBtn">Reset Form</button>
+                        </div>
+                    </form>
+                    <div id="affordabilityResult" class="results-display"></div>
+                    <div id="affordabilityCharts" class="charts-container" style="display:none;">
+                        <div class="chart-section">
+                            <h3>Monthly Payment Breakdown</h3>
+                            <div class="chart-container"><canvas id="paymentChart" aria-label="Monthly Payment Breakdown Chart" role="img"></canvas></div>
+                        </div>
+                        <div class="chart-section">
+                            <h3>Loan Balance Over Time</h3>
+                            <div class="chart-container"><canvas id="amortizationChart" aria-label="Loan Balance Over Time Chart" role="img"></canvas></div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- Stage 3: Loan Type Recommendation Quiz -->
+                <section id="stage3" class="card hidden">
+                    <h2>Stage 3: Loan Type Recommendation</h2>
+                    <form id="loanForm" aria-label="Loan Type Recommendation Quiz">
+                        <fieldset>
+                            <legend class="sr-only">Loan Qualification Questions</legend>
+                            <div class="question">
+                                <label for="creditQuiz">Approximate credit score range?</label>
+                                <div class="tooltip-wrapper"><select name="creditQuiz" id="creditQuiz" required aria-required="true">
+                                        <option value="">Select</option>
+                                        <option value="excellent">Excellent (740+)</option>
+                                        <option value="good">Good (670-739)</option>
+                                        <option value="fair">Fair (580-669)</option>
+                                        <option value="poor">Poor (Below 580)</option>
+                                    </select><span class="info-tooltip" data-tooltip="Select the range your credit score falls into.">ⓘ</span></div>
+                            </div>
+                            <div class="question">
+                                <label for="military">Veteran/Active Military?</label>
+                                <div class="tooltip-wrapper"><select name="military" id="military" required aria-required="true">
+                                        <option value="">Select</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select><span class="info-tooltip" data-tooltip="Determines eligibility for VA loans.">ⓘ</span></div>
+                            </div>
+                            <div class="question">
+                                <label for="rural">Property in eligible rural area?</label>
+                                <div class="tooltip-wrapper"><select name="rural" id="rural" required aria-required="true">
+                                        <option value="">Select</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                        <option value="unsure">Unsure</option>
+                                    </select><span class="info-tooltip" data-tooltip="Check USDA eligibility maps. Select 'Unsure' if unknown.">ⓘ</span></div>
+                            </div>
+                            <div class="question">
+                                <label for="downPaymentPercent">Down payment percentage?</label>
+                                <div class="tooltip-wrapper"><select name="downPaymentPercent" id="downPaymentPercent" required aria-required="true">
+                                        <option value="">Select</option>
+                                        <option value="0">0% (VA/USDA)</option>
+                                        <option value="3.5">~3.5% (FHA Min)</option>
+                                        <option value="5">~5%</option>
+                                        <option value="10">~10%</option>
+                                        <option value="20">20% or More</option>
+                                    </select><span class="info-tooltip" data-tooltip="Percentage of home price planned for down payment.">ⓘ</span></div>
+                            </div>
+                            <div class="question"> <!-- Added Assistance Q back -->
+                                <label for="assistance">Need down payment assistance?</label>
+                                <div class="tooltip-wrapper"><select name="assistance" id="assistance" required aria-required="true">
+                                        <option value="">Select</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select><span class="info-tooltip" data-tooltip="Are you looking for programs to help with the down payment?">ⓘ</span></div>
+                            </div>
+                        </fieldset>
+                        <div class="button-container">
+                            <button type="button" class="btn" id="loanQuizNextBtn">Get Loan Recommendation</button>
+                            <button type="button" class="btn back-button" id="loanQuizBackBtn">Back</button>
+                            <button type="button" class="btn back-button" id="loanQuizResetBtn">Reset Form</button>
+                        </div>
+                    </form>
+                    <div id="loanResult" class="results-display"></div>
+                </section>
+
+
+                <!-- Stage 4: Summary & Detailed Report -->
+                <section id="summary" class="card hidden">
+                    <h2>Your Homeownership Readiness Summary</h2>
+                    <div id="summaryContent" class="results-display" style="display: block;">
+                        <p>Loading summary...</p>
+                    </div>
+                    <div id="actionItems" class="results-display">
+                        <h3>Recommended Next Steps</h3>
+                        <ul id="nextStepsList">
+                            <li>Review detailed results and consult resources.</li>
+                        </ul>
+                    </div>
+                    <div class="button-container">
+                        <button type="button" class="btn pdf-export-btn" id="summaryExportBtn">Download Full Report (PDF)</button>
+                        <button type="button" class="btn back-button" id="summaryBackBtn">Back</button>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Sidebar: Progress Summary -->
+            <aside class="sidebar" id="sidebar" aria-label="Progress Summary">
+                <h3>Progress Summary</h3>
+                <p id="scoreSummary">Readiness Score: <strong>N/A</strong></p>
+                <p id="dtiSummary">Affordability DTI: <strong>N/A</strong></p>
+                <p id="loanSummary">Loan Recommendation: <strong>N/A</strong></p>
+                <hr>
+                <p><strong>Tip:</strong> Your progress is auto-saved in this browser.</p>
+                <button type="button" class="btn" id="saveDraftBtn" style="width: 100%; margin-top: 1rem;">Save Progress Manually</button>
+            </aside>
+
+        </div> <!-- End .layout -->
+
+        <!-- Footer -->
+        <div class="footer">
+            Brought to you by <a href="https://www.mycollegefinance.com/" target="_blank" rel="noopener noreferrer">My College Finance</a>
+        </div>
+
+
+    </div> <!-- End .container -->
+
+    <!-- Help & FAQ Section -->
+    <div id="helpSection" class="help-section" style="overflow-y: auto; max-height: 95vh;">
+        <button class="close-button" aria-label="Close Help Panel">×</button>
+        <h2>Help & FAQ</h2>
+
+        <!-- Search Wrapper -->
+        <div class="search-wrapper">
+            <input type="text" id="faqSearch" class="search-box" placeholder="Search FAQ..." oninput="filterFAQ()" aria-label="Search Frequently Asked Questions">
+            <button type="button" class="clear-search-btn" id="clearFaqBtn" aria-label="Clear FAQ Search">
+                <!-- Clear Search (X in Circle) SVG Icon -->
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25em; height: 1.25em;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div id="faqContent">
+            <div class="faq-item">
+                <h3>What is DTI (Debt-to-Income Ratio)?</h3>
+                <p>DTI is your total monthly debt payments divided by your gross monthly income (before taxes). Lenders use it to measure your borrowing risk. A lower percentage is better—under 36% is preferred.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What is PMI?</h3>
+                <p>Private Mortgage Insurance. It's usually required on conventional loans if you put down less than 20%. It protects the lender—not you—if you default.</p>
+            </div>
+            <div class="faq-item">
+                <h3>How much down payment do I *really* need?</h3>
+                <p>Depends on the loan type. VA and USDA loans allow 0% down. FHA loans require 3.5%, and conventional loans typically require 3-20% depending on your credit and risk profile.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What are Closing Costs?</h3>
+                <p>Fees you pay at the end of a real estate transaction—typically 2–5% of the home price. Includes lender fees, appraisals, title insurance, and escrow charges.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What's an Emergency Fund for?</h3>
+                <p>It’s a savings cushion of 3–6 months of living expenses kept in an accessible account. It protects you from falling behind on mortgage payments during emergencies like job loss or medical bills.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What’s the difference between Pre-Approval and Pre-Qualification?</h3>
+                <p>Pre-qualification is a basic estimate based on unverified info. Pre-approval is a more reliable letter from a lender based on verified financial documents.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What is Escrow?</h3>
+                <p>Escrow is a holding account used to manage property tax and homeowners insurance payments on your behalf—usually part of your mortgage payment.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Why does my interest rate matter so much?</h3>
+                <p>Even a small difference in your interest rate can cost or save you thousands over the life of a loan. Better credit and lower DTI usually mean better rates.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What happens if I miss a mortgage payment?</h3>
+                <p>You may incur late fees and hurt your credit score. If missed payments accumulate, your lender could start foreclosure proceedings. Communicate with your lender early if you’re in trouble.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Glossary Section -->
+    <div id="glossarySection" class="glossary-section" style="overflow-y: auto; max-height: 95vh;">
+        <button class="close-button" aria-label="Close Glossary Panel">×</button>
+        <h2>Glossary</h2>
+
+        <!-- Search Wrapper -->
+        <div class="search-wrapper">
+            <input type="text" id="glossarySearch" class="search-box" placeholder="Search terms..." oninput="filterGlossary()" aria-label="Search Glossary Terms">
+            <button type="button" class="clear-search-btn" id="clearGlossaryBtn" aria-label="Clear Glossary Search">
+                <!-- Clear Search (X in Circle) SVG Icon -->
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25em; height: 1.25em;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div id="glossaryContent">
+            <div class="glossary-item">
+                <strong class="glossary-term">DTI:</strong>
+                <span class="glossary-definition">Debt-to-Income Ratio. Monthly debt payments divided by gross monthly income. Used by lenders to assess risk.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">PMI:</strong>
+                <span class="glossary-definition">Private Mortgage Insurance. Required on conventional loans with &lt;20% down. Protects the lender.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">FHA Loan:</strong>
+                <span class="glossary-definition">A government-backed loan from the Federal Housing Administration with lower down payment requirements.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">VA Loan:</strong>
+                <span class="glossary-definition">A mortgage guaranteed by the Department of Veterans Affairs. Offers 0% down for eligible veterans.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">USDA Loan:</strong>
+                <span class="glossary-definition">Zero-down loan backed by the U.S. Dept. of Agriculture for eligible rural and suburban buyers.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Conventional Loan:</strong>
+                <span class="glossary-definition">A standard loan not insured by the government. Often requires higher credit scores and down payments.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">LTV:</strong>
+                <span class="glossary-definition">Loan-to-Value Ratio. The loan amount divided by the home’s value. A lower LTV is better for approval.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Amortization:</strong>
+                <span class="glossary-definition">The gradual repayment of a loan with fixed payments that cover interest and principal over time.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Closing Costs:</strong>
+                <span class="glossary-definition">Final fees due at closing. Includes inspection, appraisal, lender and title fees, and prepaids.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Escrow:</strong>
+                <span class="glossary-definition">An account used by lenders to pay your property taxes and homeowners insurance.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Pre-Approval:</strong>
+                <span class="glossary-definition">A conditional commitment from a lender showing how much you may borrow based on verified documents.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">PITI:</strong>
+                <span class="glossary-definition">Principal, Interest, Taxes, and Insurance—the four parts of a typical mortgage payment.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Equity:</strong>
+                <span class="glossary-definition">The difference between your home’s value and what you owe on the mortgage. Equity builds over time.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Appraisal:</strong>
+                <span class="glossary-definition">An expert’s valuation of a home’s worth, required by lenders to confirm the home supports the loan amount.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Underwriting:</strong>
+                <span class="glossary-definition">The lender’s process of reviewing your financial info to decide if you’re eligible for a mortgage loan.</span>
+            </div>
+            <div class="glossary-item">
+                <strong class="glossary-term">Earnest Money:</strong>
+                <span class="glossary-definition">A deposit made to show serious intent to buy a home. It’s credited toward closing costs if the sale goes through.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <a href="#" id="back-to-top" aria-label="Back to Top" title="Back to Top">
+        <span class="arrow" aria-hidden="true">↑</span> Back to Top
+    </a>
+    <script>
+        // Global state object
+        const state = {
+            currentStage: 1,
+            readinessScore: 0,
+            affordability: {
+                dti: null,
+                totalMonthlyPayment: null,
+                closingCost: null,
+                estimatedMaxHomePrice: null,
+                monthlyMortgage: null,
+                downPaymentAmount: null,
+                loanAmount: null
+            },
+            loanRecommendation: '',
+            checklistAnswers: {},
+            affordabilityAnswers: {},
+            loanAnswers: {}
+        };
+
+        // Chart instances
+        let paymentChart = null;
+        let amortizationChart = null;
+
+
+
+        // --- Helper: Format Currency ---
+        const formatCurrency = (amount) => {
+            const numericAmount = Number(amount);
+            if (isNaN(numericAmount)) {
+                return '$0.00';
+            }
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(numericAmount);
+        };
+
+        // --- Debounce Function ---
+        function debounce(func, delay) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // --- Theme Management ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            try {
+                localStorage.setItem('theme', newTheme);
+            } catch (e) {
+                console.error("Could not save theme preference", e);
+            }
+            // Chart redraw logic removed - Chart.js 3+ often adapts better automatically
+        }
+
+        // --- Loading Indicator ---
+        function showLoading() {
+            document.getElementById('loadingOverlay')?.classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay')?.classList.remove('active');
+        }
+
+        // --- Navigation & Progress ---
+        function updateProgressTracker(currentStage) {
+            state.currentStage = currentStage; // Update state
+            const steps = document.querySelectorAll('.progress-step');
+            let progressValue = 0;
+            steps.forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                const isActive = stepNum === currentStage;
+                step.classList.toggle('active', isActive);
+                step.setAttribute('aria-current', isActive ? 'step' : 'false'); // ARIA for current step
+                // Calculate progress based on the *start* of the current stage
+                if (stepNum < currentStage) {
+                    progressValue += 25;
+                } else if (isActive) {
+                    // Show progress as starting the current stage
+                    progressValue += 0; // Or a small amount like 5 if preferred
+                }
+            });
+            // Ensure progress bar reflects completion at the end
+            if (currentStage === 4 && state.loanRecommendation) { // Ensure stage 3 was completed
+                progressValue = 100;
+            } else if (currentStage === 4) {
+                progressValue = 75; // If directly navigated to summary without finishing quiz
+            }
+
+            const progressBar = document.getElementById('completionBar');
+            if (progressBar) progressBar.value = progressValue;
+
+            // Update sidebar summary safely
+            const scoreSummaryEl = document.getElementById('scoreSummary');
+            const dtiSummaryEl = document.getElementById('dtiSummary');
+            const loanSummaryEl = document.getElementById('loanSummary');
+
+            if (scoreSummaryEl) scoreSummaryEl.innerHTML = `Readiness Score: <strong>${state.readinessScore || 'N/A'}%</strong>`;
+            if (dtiSummaryEl) dtiSummaryEl.innerHTML = `Affordability DTI: <strong>${state.affordability?.dti ? state.affordability.dti + '%' : 'N/A'}</strong>`;
+            if (loanSummaryEl) loanSummaryEl.innerHTML = `Loan Recommendation: <strong>${state.loanRecommendation || 'N/A'}</strong>`;
+        }
+
+        function showStage(stageNumber) {
+            // Ensure stageNumber is a number
+            stageNumber = parseInt(stageNumber);
+            if (isNaN(stageNumber) || stageNumber < 1 || stageNumber > 4) {
+                console.error("Invalid stage number:", stageNumber);
+                return;
+            }
+
+            showLoading();
+            setTimeout(() => {
+                document.querySelectorAll(".main-content > .card").forEach(stage => stage.classList.add("hidden"));
+
+                const stageId = stageNumber === 4 ? "summary" : `stage${stageNumber}`;
+                const selectedStage = document.getElementById(stageId);
+
+                if (selectedStage) {
+                    selectedStage.classList.remove("hidden");
+                    if (stageNumber === 2) {
+                        autofillAffordabilityForm();
+                    }
+                    if (stageNumber === 4) {
+                        showSummary();
+                    } // Always regenerate summary content when shown
+                    updateProgressTracker(stageNumber);
+                    saveState();
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    }); // Smooth scroll to top
+                } else {
+                    console.error(`Stage element not found: ${stageId}`);
+                }
+                hideLoading();
+            }, 150); // Reduced delay
+        }
+
+        // --- State Management ---
+        function saveState() {
+            try {
+                localStorage.setItem('homeownershipState', JSON.stringify(state));
+                console.log("State Saved", state);
+            } catch (e) {
+                console.error("Failed to save state:", e);
+            }
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('homeownershipState');
+            if (saved) {
+                try {
+                    const loadedState = JSON.parse(saved);
+                    // Deep merge to preserve nested object structure if partially saved
+                    Object.keys(state).forEach(key => {
+                        if (loadedState[key] !== undefined) {
+                            if (typeof state[key] === 'object' && state[key] !== null && !Array.isArray(state[key])) {
+                                // Merge nested objects
+                                state[key] = {
+                                    ...state[key],
+                                    ...loadedState[key]
+                                };
+                            } else {
+                                state[key] = loadedState[key];
+                            }
+                        }
+                    });
+                    // Ensure essential nested objects exist
+                    state.affordability = state.affordability || {
+                        dti: null,
+                        totalMonthlyPayment: null,
+                        closingCost: null,
+                        estimatedMaxHomePrice: null,
+                        monthlyMortgage: null,
+                        downPaymentAmount: null,
+                        loanAmount: null
+                    };
+                    state.checklistAnswers = state.checklistAnswers || {};
+                    state.affordabilityAnswers = state.affordabilityAnswers || {};
+                    state.loanAnswers = state.loanAnswers || {};
+
+                    repopulateForm('checklistForm', state.checklistAnswers);
+                    repopulateForm('affordabilityForm', state.affordabilityAnswers);
+                    repopulateForm('loanForm', state.loanAnswers);
+
+                    // Recalculate DTI from checklist answers if they exist
+                    const incomeInput = document.getElementById('monthlyIncome');
+                    const debtInput = document.getElementById('monthlyDebt');
+                    if (incomeInput && debtInput && state.checklistAnswers.monthlyIncome && state.checklistAnswers.monthlyDebt) {
+                        incomeInput.value = state.checklistAnswers.monthlyIncome;
+                        debtInput.value = state.checklistAnswers.monthlyDebt;
+                        calculateDTI();
+                    }
+                    // Recalculate affordability if those answers exist
+                    if (Object.keys(state.affordabilityAnswers).length > 2) { // Check if more than initial state
+                        calculateAffordability(); // Recalculate to redraw charts etc.
+                    }
+                    // Recalculate loan recommendation if those answers exist
+                    if (Object.keys(state.loanAnswers).length > 0) {
+                        determineLoan();
+                    }
+
+                    console.log("State loaded:", state);
+                } catch (e) {
+                    console.error("Failed to parse saved state:", e);
+                    localStorage.removeItem('homeownershipState');
+                }
+            }
+
+            // Show initial stage (if no stage was saved, default to 1)
+            showStage(state.currentStage || 1);
+        }
+
+        function repopulateForm(formId, answers) {
+            const form = document.getElementById(formId);
+            if (!form || !answers) return;
+            Object.keys(answers).forEach(key => {
+                const input = form.elements[key];
+                if (input) {
+                    input.value = answers[key] || ''; // Use empty string if answer is null/undefined
+                    validateInputVisual(input); // Validate visually
+                    if (key === 'interestRate' && input.type === 'range') {
+                        const display = document.getElementById('rateDisplay');
+                        if (display) display.innerText = input.value;
+                    }
+                }
+            });
+        }
+
+        // --- Form Validation & Logic ---
+        function validateInputVisual(input) { // Helper for visual feedback
+            if (!input) return;
+            const value = input.value.trim();
+            const isNumberInput = input.type === 'number';
+            let numValue = NaN;
+            if (isNumberInput) numValue = parseFloat(value);
+
+            if (input.required) {
+                if (!value || (isNumberInput && isNaN(numValue)) || (isNumberInput && input.min !== null && numValue < parseFloat(input.min)) || (isNumberInput && input.max !== null && numValue > parseFloat(input.max))) {
+                    input.classList.add('invalid');
+                    input.classList.remove('valid');
+                    return false;
+                } else {
+                    input.classList.remove('invalid');
+                    input.classList.add('valid');
+                    return true;
+                }
+            } else { // Not required, remove validation classes
+                input.classList.remove('valid', 'invalid');
+                return true;
+            }
+        }
+
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return false;
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            let isFormValid = true;
+            inputs.forEach(input => {
+                if (!validateInputVisual(input)) { // Use helper for validation
+                    isFormValid = false;
+                }
+            });
+            if (!isFormValid) {
+                alert("Please complete all required fields correctly.");
+            }
+            return isFormValid;
+        }
+
+        function collectFormData(formId, stateObject) {
+            const form = document.getElementById(formId);
+            if (!form || !stateObject) return;
+            const formData = new FormData(form);
+            // Clear the object first in case some fields were removed/changed
+            // Alternatively, only update existing keys if preferred
+            // stateObject = {}; // Uncomment to clear before populating
+            formData.forEach((value, key) => {
+                stateObject[key] = value.trim();
+            });
+        }
+
+        function calculateDTI() {
+            const incomeInput = document.getElementById('monthlyIncome');
+            const debtInput = document.getElementById('monthlyDebt');
+            const resultField = document.getElementById('dtiResult');
+            const statusField = document.getElementById('dtiStatus');
+            // Ensure all elements exist before proceeding
+            if (!incomeInput || !debtInput || !resultField || !statusField) {
+                console.error("DTI calculation: Missing required elements.");
+                return;
+            }
+
+            const income = parseFloat(incomeInput.value) || 0;
+            const debt = parseFloat(debtInput.value) || 0;
+
+            // Update state with current input values (even if 0 or invalid for immediate feedback)
+            state.checklistAnswers.monthlyIncome = incomeInput.value;
+            state.checklistAnswers.monthlyDebt = debtInput.value;
+            // NOTE: saveState() will be called by the stage change or manual save button
+
+            let dti = NaN;
+            let statusMessage = '';
+            let statusClass = '';
+            let resultText = '';
+            let dtiForState = null; // Variable to store valid DTI for state
+
+            if (income > 0) {
+                dti = (debt / income) * 100;
+                resultText = dti.toFixed(1) + '%';
+                dtiForState = dti.toFixed(1); // Store valid DTI
+                if (dti <= 36) {
+                    statusMessage = 'Good';
+                    statusClass = 'green';
+                } else if (dti <= 43) {
+                    statusMessage = 'Fair';
+                    statusClass = 'yellow';
+                } else {
+                    statusMessage = 'High';
+                    statusClass = 'red';
+                }
+                statusField.textContent = `Status: ${statusMessage}`;
+            } else if (incomeInput.value.trim() !== '' || debtInput.value.trim() !== '') {
+                resultText = 'N/A';
+                statusField.textContent = 'Valid Income Required';
+                statusClass = 'red';
+            } else {
+                resultText = '';
+                statusField.textContent = '';
+                statusClass = '';
+            }
+
+            resultField.value = resultText;
+            statusField.className = statusClass; // Apply color class
+
+            // Update affordability state DTI ONLY if calculation was valid
+            state.affordability.dti = dtiForState; // Update state with calculated DTI or null
+
+            // Update sidebar summary immediately
+            const dtiSummaryEl = document.getElementById('dtiSummary');
+            if (dtiSummaryEl) dtiSummaryEl.innerHTML = `Affordability DTI: <strong>${dtiForState ? dtiForState + '%' : 'N/A'}</strong>`;
+
+            // Re-validate the inputs visually
+            validateInputVisual(incomeInput);
+            validateInputVisual(debtInput);
+        }
+
+        function validateAndSubmitChecklist() {
+            if (!validateForm('checklistForm')) return;
+            collectFormData('checklistForm', state.checklistAnswers);
+            calculateChecklistScore();
+            // showStage is called in calculateChecklistScore
+        }
+
+        function calculateChecklistScore() {
+            let yesCount = 0;
+            let skipCount = 0;
+            const relevantKeys = ['job', 'employment', 'creditScore', 'bills', 'downpayment', 'closingCosts', 'emergency', 'monthlyCosts', 'maintenance', 'programsAwareness'];
+            let totalQuestions = relevantKeys.length;
+
+            relevantKeys.forEach(key => {
+                const value = state.checklistAnswers[key];
+                if (value === 'yes') {
+                    yesCount++;
+                } else if (value === 'skip') {
+                    skipCount++;
+                }
+                const element = document.getElementById(key);
+                if (element) {
+                    validateInputVisual(element);
+                } // Use helper
+            });
+
+            const questionsAnswered = totalQuestions - skipCount;
+            state.readinessScore = questionsAnswered > 0 ? Math.round((yesCount / questionsAnswered) * 100) : 0;
+            console.log("Readiness Score Calculated:", state.readinessScore);
+            updateProgressTracker(1); // Update tracker *before* changing stage
+            showStage(2);
+        }
+
+        function calculateMonthlyMortgage(principal, annualRate, years) {
+            if (principal <= 0 || annualRate < 0 || years <= 0) return 0;
+            const monthlyRate = annualRate / 100 / 12;
+            const n = years * 12;
+            if (monthlyRate === 0) return principal / n;
+            const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+            return isNaN(payment) ? 0 : payment;
+        }
+
+        function validateAndCalculateAffordability() {
+            if (!validateForm('affordabilityForm')) return;
+            collectFormData('affordabilityForm', state.affordabilityAnswers);
+            calculateAffordability();
+        }
+
+
+        function calculateAffordability() {
+            try {
+                showLoading();
+
+                // 1) Read values directly from the DOM inputs
+                const income = parseFloat(document.getElementById('income')?.value) || 0;
+                const debt = parseFloat(document.getElementById('debt')?.value) || 0;
+                const downPaymentAmount = parseFloat(document.getElementById('downPaymentAmount')?.value) || 0;
+                const homePrice = parseFloat(document.getElementById('homePrice')?.value) || 0;
+                const interestRate = parseFloat(document.getElementById('interestRate')?.value) || 0;
+                const loanTerm = parseInt(document.getElementById('loanTerm')?.value) || 30;
+                const taxInsurance = parseFloat(document.getElementById('taxInsurance')?.value) || 0;
+                const hoa = parseFloat(document.getElementById('hoa')?.value) || 0;
+
+                // 2) Validate required fields
+                if (income <= 0) {
+                    throw new Error("Please enter a valid Monthly Income greater than 0.");
+                }
+                if (homePrice <= 0) {
+                    throw new Error("Please enter a valid Home Price greater than 0.");
+                }
+                if (interestRate <= 0 || interestRate > 25) {
+                    throw new Error("Please enter a valid Interest Rate (1% - 25%).");
+                }
+                const loanAmount = homePrice - downPaymentAmount;
+                if (loanAmount <= 0) {
+                    throw new Error("Your Down Payment must be less than the Home Price.");
+                }
+
+                // 3) Do the math
+                const monthlyMortgage = calculateMonthlyMortgage(loanAmount, interestRate, loanTerm);
+                // Ensure monthlyMortgage is a valid number before proceeding
+                if (isNaN(monthlyMortgage)) {
+                    throw new Error("Could not calculate monthly mortgage payment.");
+                }
+                const actualMortgage = monthlyMortgage; // Keep separate for clarity if needed later
+                const actualTotalPayment = monthlyMortgage + taxInsurance + hoa;
+                const actualDTI = income > 0 ? ((debt + actualTotalPayment) / income) * 100 : Infinity;
+
+                // 4) Save results to state
+                state.affordability = {
+                    ...state.affordability, // Preserve other potential state values
+                    monthlyMortgage: actualMortgage.toFixed(2),
+                    totalMonthlyPayment: actualTotalPayment.toFixed(2),
+                    dti: actualDTI.toFixed(1),
+                    downPaymentAmount: downPaymentAmount.toFixed(2),
+                    loanAmount: loanAmount.toFixed(2),
+                    // estimatedMaxHomePrice: null // Keep null unless calculated elsewhere
+                };
+
+                // 5) Determine DTI status
+                let status, statusClass;
+                if (actualDTI <= 36) {
+                    status = "Good (Generally Affordable)";
+                    statusClass = "green";
+                } else if (actualDTI <= 43) {
+                    status = "Fair (Potentially Affordable, but Tight)";
+                    statusClass = "yellow";
+                } else {
+                    status = "High (May Not Qualify / Risky)";
+                    statusClass = "red";
+                }
+
+                // 6) Update DOM with results (Using the recommended structure)
+                const resultElement = document.getElementById("affordabilityResult");
+                if (resultElement) {
+                    resultElement.innerHTML = `
+                        <h3>Affordability Calculation</h3>
+                        <p><span>Home Price:</span> <strong>${formatCurrency(homePrice)}</strong></p>
+                        <p><span>Down Payment:</span> <strong>${formatCurrency(downPaymentAmount)}</strong></p>
+                        <p><span>Loan Amount:</span> <strong>${formatCurrency(loanAmount)}</strong></p>
+                        <p><span>Est. Monthly P&I:</span> <strong>${formatCurrency(actualMortgage)}</strong></p>
+                        <p><span>Est. Monthly Tax/Ins:</span> <strong>${formatCurrency(taxInsurance)}</strong></p>
+                        <p><span>Est. Monthly HOA:</span> <strong>${formatCurrency(hoa)}</strong></p>
+                        <p><strong><span>Est. Total Monthly Payment:</span></strong> <strong>${formatCurrency(actualTotalPayment)}</strong></p>
+                        <p><span>Resulting Back-End DTI:</span> <strong class="${statusClass}">${actualDTI.toFixed(1)}% (${status})</strong></p>
+                        <p><small>(Based on ${formatCurrency(income)} income, ${formatCurrency(debt)} debt, ${interestRate}% rate, ${loanTerm} years)</small></p>
+                        <div class="button-container">
+                            <button type="button" class="btn" id="affordabilityNextBtn">Next: Loan Types</button>
+                        </div>
+                    `;
+                    // Re-attach listener because innerHTML replaces the old button
+                    document.getElementById('affordabilityNextBtn')?.addEventListener('click', () => showStage(3));
+                    resultElement.style.display = 'block'; // Show the results block
+                } else {
+                    console.error("Affordability result element not found.");
+                }
+
+                // 7) Update charts
+                drawPaymentChart(actualMortgage, taxInsurance, hoa);
+                loadAmortizationChart(loanAmount, interestRate, loanTerm);
+                const chartsContainer = document.getElementById('affordabilityCharts');
+                if (chartsContainer) chartsContainer.style.display = 'grid'; // Use grid for better layout
+
+                // 8) Persist + UI updates
+                saveState();
+                updateProgressTracker(state.currentStage); // Update sidebar/progress bar
+                hideLoading();
+
+            } catch (error) {
+                hideLoading();
+                alert(`Calculation Error: ${error.message}`);
+                console.error("Error in calculateAffordability:", error);
+                // Optionally hide results/charts on error
+                const resultElement = document.getElementById("affordabilityResult");
+                if (resultElement) resultElement.style.display = 'none';
+                const chartsContainer = document.getElementById('affordabilityCharts');
+                if (chartsContainer) chartsContainer.style.display = 'none';
+            }
+        }
+
+        function drawPaymentChart(mortgagePI, taxIns, hoa) {
+            const ctx = document.getElementById('paymentChart')?.getContext('2d');
+            if (!ctx) {
+                console.error("Payment chart canvas not found");
+                return; // Exit if canvas doesn't exist
+            }
+
+            const dataValues = [parseFloat(mortgagePI) || 0, parseFloat(taxIns) || 0, parseFloat(hoa) || 0];
+            const labels = ['Principal & Interest', 'Taxes & Insurance', 'HOA Fees'];
+
+            // Filter out zero values to avoid cluttering the chart/legend
+            const filteredData = dataValues.filter(value => value > 0.001); // Use small threshold
+            const filteredLabels = labels.filter((_, index) => dataValues[index] > 0.001);
+
+            // Get theme colors dynamically
+            const styles = getComputedStyle(document.documentElement);
+            const colorPI = styles.getPropertyValue('--primary-color').trim() || '#1a365d';
+            const colorTI = styles.getPropertyValue('--neutral-color').trim() || '#a0aec0'; // Use neutral color variable
+            const colorHOA = styles.getPropertyValue('--warning-color').trim() || '#dd6b20';
+            const textColor = styles.getPropertyValue('--text-color').trim() || '#2d3748';
+            const chartBgColor = styles.getPropertyValue('--card-bg').trim() || '#ffffff'; // Background for border separation
+
+            const themeColors = [colorPI, colorTI, colorHOA];
+            const filteredColors = themeColors.filter((_, index) => dataValues[index] > 0.001);
+
+            // Destroy previous chart instance if it exists
+            if (paymentChart) {
+                paymentChart.destroy();
+            }
+
+            // Don't create chart if there's no data
+            if (filteredData.length === 0) {
+                console.log("No data to display in payment chart.");
+                paymentChart = null; // Ensure reference is null
+                return;
+            }
+
+            paymentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: filteredLabels,
+                    datasets: [{
+                        data: filteredData,
+                        backgroundColor: filteredColors,
+                        borderColor: chartBgColor, // Use card background for border separation
+                        borderWidth: 3 // Slightly thicker border for visual separation
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Allow chart to fill container height
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: textColor, // Use dynamic text color
+                                padding: 15,
+                                boxWidth: 12,
+                                usePointStyle: true,
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    // Calculate percentage
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const value = context.raw;
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+                                }
+                            },
+                            bodyFont: {
+                                size: 11
+                            },
+                            padding: 10
+                        }
+                    },
+                    cutout: '65%' // Adjust hole size if desired
+                }
+            });
+            // No need to call updateColors here, colors are set during creation
+        }
+
+        function loadAmortizationChart(loanAmount, annualRate, years) {
+            const ctx = document.getElementById('amortizationChart')?.getContext('2d');
+            if (!ctx) {
+                console.error("Amortization chart canvas not found");
+                return; // Exit if canvas doesn't exist
+            }
+
+            const labels = [];
+            const balances = [];
+            let balance = parseFloat(loanAmount) || 0;
+            const monthlyRate = (parseFloat(annualRate) || 0) / 100 / 12;
+            const loanTermYears = parseInt(years) || 0;
+            const n = loanTermYears * 12;
+
+            // Validate inputs before proceeding
+            if (balance <= 0 || monthlyRate < 0 || n <= 0) {
+                if (amortizationChart) amortizationChart.destroy(); // Clear previous chart if any
+                amortizationChart = null;
+                console.log("Invalid inputs for amortization chart, clearing chart.");
+                return;
+            }
+
+            const payment = calculateMonthlyMortgage(balance, annualRate, loanTermYears);
+            if (isNaN(payment) || payment <= 0) {
+                if (amortizationChart) amortizationChart.destroy();
+                amortizationChart = null;
+                console.log("Invalid payment calculation, clearing amortization chart.");
+                return;
+            }
+
+            labels.push('Start');
+            balances.push(balance.toFixed(2));
+
+            for (let i = 1; i <= n; i++) {
+                const interest = balance * monthlyRate;
+                const principalPayment = payment - interest;
+                balance -= principalPayment;
+                // Use threshold for floating point precision, prevent tiny negative balances
+                if (balance < 0.01) balance = 0;
+
+                // Add data point every year for clarity, plus the final point
+                if (i % 12 === 0 || i === n || balance === 0) {
+                    let yearLabel = `Year ${Math.ceil(i / 12)}`;
+                    // Avoid duplicate year labels if balance hits zero exactly on a year end
+                    if (labels[labels.length - 1] !== yearLabel || i === n || balance === 0) {
+                        labels.push(yearLabel);
+                        balances.push(balance.toFixed(2));
+                    }
+                }
+                if (balance === 0) break; // Stop calculation if balance is zero
+            }
+            // Ensure the final 'Year X' label exists if loop ended early due to rounding
+            if (labels[labels.length - 1] !== `Year ${loanTermYears}` && balance === 0) {
+                labels.push(`Year ${loanTermYears}`);
+                balances.push('0.00');
+            }
+
+
+            // Get theme colors dynamically
+            const styles = getComputedStyle(document.documentElement);
+            const lineColor = styles.getPropertyValue('--primary-color').trim() || '#1a365d';
+            const gridColor = styles.getPropertyValue('--border-color').trim() || '#e2e8f0';
+            const tickColor = styles.getPropertyValue('--text-muted').trim() || '#718096';
+            // const textColor = styles.getPropertyValue('--text-color').trim() || '#2d3748'; // Not directly used here, but available
+
+            // Destroy previous instance
+            if (amortizationChart) {
+                amortizationChart.destroy();
+            }
+
+            amortizationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Remaining Loan Balance',
+                        data: balances,
+                        borderColor: lineColor,
+                        backgroundColor: lineColor + '20', // Use hex/rgba + opacity for fill
+                        fill: true,
+                        tension: 0.2,
+                        pointRadius: 0, // Hide points on line
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: lineColor // Match line color on hover
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    // Dynamic formatting: $Xk for large numbers, $X for smaller
+                                    if (value >= 1000 || value <= -1000) {
+                                        return '$' + Math.round(value / 1000) + 'k';
+                                    }
+                                    return formatCurrency(value); // Use full currency for smaller values
+                                },
+                                color: tickColor
+                            },
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: tickColor,
+                                maxRotation: 0,
+                                autoSkipPadding: 15 // Adjust padding to prevent overlap
+                            },
+                            grid: {
+                                display: false
+                            } // Hide vertical grid lines
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) { // Show Year X in tooltip title
+                                    return tooltipItems[0]?.label || '';
+                                },
+                                label: function(context) {
+                                    return `Balance: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            });
+            // No need to call updateColors here, colors are set during creation
+        }
+
+        // Stage 3 Logic
+        function validateAndDetermineLoan() {
+            if (!validateForm('loanForm')) return;
+            collectFormData('loanForm', state.loanAnswers);
+            determineLoan();
+            // showStage(4); // Called within determineLoan now
+        }
+
+        function determineLoan() {
+            const answers = state.loanAnswers;
+            let recommendation = "Conventional Loan"; // Default
+
+            if (answers.military === "yes") {
+                recommendation = "VA Loan (Likely best option)";
+            } else if (answers.rural === "yes") {
+                recommendation = "USDA Loan (If income/property eligible)";
+            } else if (answers.creditQuiz === "poor") {
+                recommendation = "FHA Loan or Assistance Program (Explore options)";
+            } else if (answers.creditQuiz === "fair") {
+                recommendation = "FHA Loan (Likely best option)";
+            } else if (answers.creditQuiz === "good") {
+                if (answers.downPaymentPercent === '0' || answers.downPaymentPercent === '3.5') {
+                    recommendation = "FHA Loan or Low Down Payment Conventional";
+                } else {
+                    recommendation = "Conventional Loan (Consider PMI if < 20% down)";
+                }
+            } else if (answers.creditQuiz === "excellent") {
+                if (answers.downPaymentPercent === '0' || answers.downPaymentPercent === '3.5') {
+                    recommendation = "Low Down Payment Conventional (Possibly FHA)";
+                } else if (answers.downPaymentPercent === '20') {
+                    recommendation = "Conventional Loan (No PMI likely)";
+                } else {
+                    recommendation = "Conventional Loan (with PMI likely)";
+                }
+            }
+            // Refine based on down payment assistance need if not VA/USDA
+            if (recommendation.includes("Conventional") || recommendation.includes("FHA")) {
+                // Check if assistance key exists and is 'yes'
+                if (answers.assistance && answers.assistance === "yes") {
+                    recommendation += " + Down Payment Assistance Program";
+                }
+            }
+
+            state.loanRecommendation = recommendation;
+            const resultEl = document.getElementById("loanResult");
+            if (resultEl) {
+                resultEl.innerHTML = `
+            <h3>Loan Recommendation</h3>
+            <p>Based on your answers, a potential suitable loan type is:</p>
+            <p><strong>${recommendation}</strong></p>
+            <p><small>This is a general recommendation. Consult with lenders for specific qualification details and options.</small></p>
+            <div class="button-container">
+                <button type="button" class="btn" id="loanResultGoToSummaryBtn">Next: View Summary</button> <!-- CHANGED ID HERE -->
+            </div>
+        `;
+                // Add listener to the newly created button using the NEW ID
+                document.getElementById('loanResultGoToSummaryBtn')?.addEventListener('click', () => showStage(4)); // USE NEW ID HERE
+                resultEl.style.display = 'block';
+            }
+            saveState();
+            updateProgressTracker(state.currentStage); // Update sidebar
+        }
+
+        // Added missing showSummary function
+        // Continue from showSummary() function
+        function showSummary() {
+            const summaryContent = document.getElementById('summaryContent');
+            if (!summaryContent) {
+                console.error("Summary content element not found");
+                return;
+            }
+
+            // Generate HTML for summary
+            let html = `<h3>Your Homeownership Readiness Results</h3>`;
+
+            // Readiness score section
+            html += `<p><strong>Readiness Score:</strong> ${state.readinessScore || 0}%</p>`;
+
+            let readinessMessage = "";
+            if (state.readinessScore >= 80) {
+                readinessMessage = "You appear to be well-prepared for homeownership based on your answers.";
+            } else if (state.readinessScore >= 60) {
+                readinessMessage = "You're on your way to being ready for homeownership, but have some areas to improve.";
+            } else {
+                readinessMessage = "You may need more preparation before purchasing a home. Focus on the areas where you answered 'No'.";
+            }
+            html += `<p>${readinessMessage}</p>`;
+
+            // Affordability section
+            html += `<h3>Affordability Analysis</h3>`;
+            if (state.affordability.dti) {
+                html += `<p><strong>Debt-to-Income Ratio:</strong> ${state.affordability.dti}%</p>`;
+                let dtiMessage = "";
+                if (parseFloat(state.affordability.dti) <= 36) {
+                    dtiMessage = "Your DTI ratio is within a healthy range for mortgage qualification.";
+                } else if (parseFloat(state.affordability.dti) <= 43) {
+                    dtiMessage = "Your DTI ratio is acceptable but close to lender limits. Consider reducing debt if possible.";
+                } else {
+                    dtiMessage = "Your DTI ratio is higher than what many lenders prefer. Focus on reducing debt or increasing income before applying.";
+                }
+                html += `<p>${dtiMessage}</p>`;
+
+                if (state.affordability.totalMonthlyPayment) {
+                    html += `<p><strong>Estimated Monthly Payment:</strong> ${formatCurrency(state.affordability.totalMonthlyPayment)}</p>`;
+                }
+            } else {
+                html += `<p>No affordability calculation has been completed yet.</p>`;
+            }
+
+            // Loan recommendation section
+            html += `<h3>Loan Type Recommendation</h3>`;
+            if (state.loanRecommendation) {
+                html += `<p><strong>Suggested Loan Type:</strong> ${state.loanRecommendation}</p>`;
+                html += `<p>This recommendation is based on your specific circumstances including credit profile, down payment amount, and other factors you provided.</p>`;
+            } else {
+                html += `<p>No loan recommendation has been generated yet.</p>`;
+            }
+
+            // Action items section
+            let actionItems = [];
+
+            // Add action items based on checklist answers
+            if (state.checklistAnswers.downpayment === 'no') {
+                actionItems.push("Start saving for a down payment (aim for at least 3.5% of your target home price).");
+            }
+
+            if (state.checklistAnswers.creditScore === 'no') {
+                actionItems.push("Work on improving your credit score to at least 620 for better loan options and rates.");
+            }
+
+            if (state.checklistAnswers.emergency === 'no') {
+                actionItems.push("Build an emergency fund of 3-6 months of expenses separate from your down payment savings.");
+            }
+
+            if (state.checklistAnswers.programsAwareness === 'no') {
+                actionItems.push("Research first-time homebuyer programs in your area for potential assistance.");
+            }
+
+            if (state.checklistAnswers.education === 'no') {
+                actionItems.push("Consider taking a homebuyer education course (often required for assistance programs).");
+            }
+
+            // Add DTI-based action items
+            if (state.affordability.dti && parseFloat(state.affordability.dti) > 43) {
+                actionItems.push("Reduce debt or increase income to improve your debt-to-income ratio below 43%.");
+            }
+
+            // Update the action items list
+            const actionItemsList = document.getElementById('nextStepsList');
+            if (actionItemsList) {
+                if (actionItems.length > 0) {
+                    actionItemsList.innerHTML = actionItems.map(item => `<li>${item}</li>`).join('');
+                } else {
+                    actionItemsList.innerHTML = `<li>Continue saving for your down payment and closing costs.</li>
+                                       <li>Get pre-approved with a lender when you're ready to begin house hunting.</li>
+                                       <li>Consider working with a realtor experienced with first-time homebuyers.</li>`;
+                }
+            }
+
+            // Display the summary
+            summaryContent.innerHTML = html;
+            summaryContent.style.display = 'block';
+
+            // Show action items
+            const actionItemsSection = document.getElementById('actionItems');
+            if (actionItemsSection) {
+                actionItemsSection.style.display = 'block';
+            }
+        }
+
+
+        // --- PDF Generation Functions (Summary Only - CSS Driven Hiding) ---
+
+        function prepareForPrint() {
+            console.log("--- prepareForPrint (Summary Only - CSS Mode) START ---");
+
+            // 1. Ensure Summary Content is Generated and Elements Exist
+            const summarySection = document.getElementById('summary');
+            let summaryContent = document.getElementById('summaryContent');
+            let actionItems = document.getElementById('actionItems');
+
+            if (!summarySection) {
+                console.error("PRINT PREP FAILED: Cannot find #summary element.");
+                alert("Error: Summary section not found. Cannot print.");
+                return false;
+            }
+
+            const needsGeneration = !summaryContent || !actionItems || (summaryContent && summaryContent.textContent.includes("Loading summary..."));
+            if (needsGeneration) {
+                console.log("Summary content needs generation. Calling showSummary().");
+                if (typeof showSummary !== 'function') {
+                    console.error("showSummary function is not defined!");
+                    alert("Internal Error: Cannot generate summary for printing.");
+                    return false;
+                }
+                try {
+                    showSummary(); // Generate the content
+                    summaryContent = document.getElementById('summaryContent'); // Re-fetch
+                    actionItems = document.getElementById('actionItems'); // Re-fetch
+                } catch (e) {
+                    console.error("Error executing showSummary() during print prep:", e);
+                    alert("An error occurred generating summary content for print.");
+                    return false;
+                }
+                if (!summaryContent || !actionItems || (summaryContent && summaryContent.textContent.includes("Loading summary..."))) {
+                    console.error("PRINT PREP FAILED: Required summary content elements not found or invalid after generation attempt.");
+                    alert("Error: Failed to prepare summary content for printing.");
+                    return false;
+                }
+                console.log("Summary content successfully generated/verified.");
+            } else {
+                console.log("Summary content already exists and seems valid.");
+            }
+
+            // 2. Ensure Summary Elements ARE VISIBLE before print CSS takes over
+            // Important in case they were previously hidden by JS
+            summarySection.style.display = 'block';
+            if (summaryContent) summaryContent.style.display = 'block';
+            if (actionItems) actionItems.style.display = 'block';
+
+
+            // 3. Add Print-Specific Class to Body
+            document.body.classList.add('printing-summary-only'); // Class for CSS targeting
+            document.title = "My Homeownership Readiness Summary"; // Set print title
+            console.log("Added 'printing-summary-only' class to body.");
+
+
+            console.log("--- prepareForPrint (Summary Only - CSS Mode) END ---");
+            return true; // Indicate success
+        }
+
+        function generatePDF() {
+            // This function is called by BOTH buttons - No changes needed here from last version
+            try {
+                console.log("generatePDF called (Summary Only Print)");
+                setTimeout(() => { // Delay prep slightly
+                    const prepSuccess = prepareForPrint();
+                    if (prepSuccess) {
+                        setTimeout(() => { // Delay print slightly
+                            try {
+                                console.log("Calling window.print()...");
+                                window.print();
+                                console.log("window.print() called.");
+                                setTimeout(restoreAfterPrint, 1500); // Restore after print dialog
+                            } catch (printError) {
+                                console.error("Error during window.print():", printError);
+                                alert("An error occurred while trying to print.");
+                                restoreAfterPrint();
+                            }
+                        }, 300); // Delay before print
+                    } else {
+                        console.error("prepareForPrint failed. Aborting print.");
+                        restoreAfterPrint(); // Restore UI if prep failed
+                    }
+                }, 50); // Delay before prep
+            } catch (prepareError) {
+                console.error("Error setting up prepareForPrint() call:", prepareError);
+                alert("An error occurred while preparing the document for printing.");
+                restoreAfterPrint();
+            }
+        }
+
+        function restoreAfterPrint() {
+            console.log("--- restoreAfterPrint START ---");
+
+            // 1. Remove Print-Specific Class from Body
+            document.body.classList.remove('printing-summary-only');
+            console.log("Removed 'printing-summary-only' class from body.");
+
+            document.title = "Homeownership Readiness Tool"; // Restore original title
+
+            // 2. Remove any inline display styles set during prep (important!)
+            const allStages = ['stage1', 'stage2', 'stage3', 'summary'];
+            allStages.forEach(stageId => {
+                const stageElement = document.getElementById(stageId);
+                if (stageElement) {
+                    stageElement.style.display = ''; // Remove inline style override
+                }
+            });
+            const summaryContent = document.getElementById('summaryContent');
+            if (summaryContent) summaryContent.style.display = '';
+            const actionItems = document.getElementById('actionItems');
+            if (actionItems) actionItems.style.display = '';
+
+
+            // 3. Re-show the correct stage based on the application's state using showStage
+            if (typeof showStage === 'function' && state.currentStage) {
+                console.log(`Attempting to restore visibility to stage: ${state.currentStage}`);
+                showStage(state.currentStage); // Let showStage handle the .hidden class
+            } else {
+                console.warn("Could not restore stage visibility automatically via showStage.");
+                // Fallback: Manually ensure correct stage is shown if showStage unavailable
+                const currentStageElId = state.currentStage === 4 ? 'summary' : `stage${state.currentStage}`;
+                document.querySelectorAll(".main-content > .card").forEach(stage => {
+                    stage.classList.toggle("hidden", stage.id !== currentStageElId);
+                });
+            }
+
+            console.log("--- restoreAfterPrint END ---");
+        }
+
+        // Reset Form
+        function resetForm(formId) {
+            if (!confirm('Are you sure you want to reset this form? All data in this section will be cleared.')) {
+                return;
+            }
+
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            // Reset the form
+            form.reset();
+
+            // Clear validation styles
+            form.querySelectorAll('input, select').forEach(input => {
+                input.classList.remove('valid', 'invalid');
+            });
+
+            // Clear state data for this form
+            if (formId === 'checklistForm') {
+                state.checklistAnswers = {};
+                state.readinessScore = 0;
+            } else if (formId === 'affordabilityForm') {
+                state.affordabilityAnswers = {};
+                // Reset affordability calculations
+                state.affordability = {
+                    dti: null,
+                    totalMonthlyPayment: null,
+                    closingCost: null,
+                    estimatedMaxHomePrice: null,
+                    monthlyMortgage: null,
+                    downPaymentAmount: null,
+                    loanAmount: null
+                };
+                // Clear results
+                const resultElement = document.getElementById("affordabilityResult");
+                if (resultElement) resultElement.style.display = 'none';
+                // Hide charts
+                const chartsContainer = document.getElementById('affordabilityCharts');
+                if (chartsContainer) chartsContainer.style.display = 'none';
+            } else if (formId === 'loanForm') {
+                state.loanAnswers = {};
+                state.loanRecommendation = '';
+                // Clear results
+                const resultElement = document.getElementById("loanResult");
+                if (resultElement) resultElement.style.display = 'none';
+            }
+
+            // Save the cleared state
+            saveState();
+            updateProgressTracker(state.currentStage);
+        }
+
+        // Autofill Affordability Form
+        function autofillAffordabilityForm() {
+            // Only autofill if we have values and the form is empty
+            const incomeField = document.getElementById('income');
+            const debtField = document.getElementById('debt');
+
+            if (!incomeField || !debtField) return;
+
+            // Check if form is empty
+            if (!incomeField.value && !debtField.value) {
+                // Get values from checklist if available
+                const checklistIncome = state.checklistAnswers.monthlyIncome;
+                const checklistDebt = state.checklistAnswers.monthlyDebt;
+
+                if (checklistIncome) {
+                    incomeField.value = checklistIncome;
+                    validateInputVisual(incomeField);
+                }
+
+                if (checklistDebt) {
+                    debtField.value = checklistDebt;
+                    validateInputVisual(debtField);
+                }
+            }
+        }
+
+        // Manual Save Function
+        function saveDraft() {
+            // Collect current data from all forms
+            collectFormData('checklistForm', state.checklistAnswers);
+            collectFormData('affordabilityForm', state.affordabilityAnswers);
+            collectFormData('loanForm', state.loanAnswers);
+
+            // Save state
+            saveState();
+
+            // Show confirmation
+            alert('Your progress has been saved.');
+        }
+
+        // Notes Management
+        let notes = []; // Ensure notes array is declared globally if not already
+
+        function renderNotes() {
+            const display = document.getElementById('notes-display');
+            if (!display) {
+                console.error("Notes display area not found.");
+                return;
+            }
+
+            display.innerHTML = '';
+            if (!Array.isArray(notes) || notes.length === 0) {
+                display.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No notes saved yet.</p>';
+                return;
+            }
+
+            notes.forEach((note, index) => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note-item';
+
+                // Using textContent to prevent XSS issues
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'note-content';
+
+                const p = document.createElement('p');
+                p.textContent = note.text;
+
+                const small = document.createElement('small');
+                small.textContent = `Saved: ${note.date}`;
+
+                contentDiv.appendChild(p);
+                contentDiv.appendChild(small);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-button';
+                deleteBtn.setAttribute('aria-label', 'Delete note');
+                deleteBtn.innerHTML = '×'; // Use HTML entity for better rendering
+                deleteBtn.type = 'button'; // Explicitly set type
+                deleteBtn.onclick = () => deleteNote(index);
+
+                noteElement.appendChild(contentDiv);
+                noteElement.appendChild(deleteBtn);
+                display.appendChild(noteElement);
+            });
+        }
+
+        function deleteNote(index) {
+            if (!Array.isArray(notes) || index < 0 || index >= notes.length) {
+                console.error("Invalid index for deleteNote:", index);
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete this note?')) {
+                notes.splice(index, 1);
+                try {
+                    localStorage.setItem('homeownershipNotes', JSON.stringify(notes)); // Use a specific key
+                } catch (e) {
+                    console.error("Failed to save notes after deletion:", e);
+                }
+                renderNotes();
+            }
+        }
+
+        function saveNote() {
+            const noteTextArea = document.getElementById('investment-notes'); // Make sure ID is correct in HTML
+            if (!noteTextArea) {
+                console.error("Notes textarea not found.");
+                return;
+            }
+
+            const noteText = noteTextArea.value.trim();
+
+            if (noteText) {
+                const newNote = {
+                    text: noteText,
+                    date: new Date().toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                };
+
+                if (!Array.isArray(notes)) {
+                    notes = [];
+                } // Initialize if needed
+
+                notes.push(newNote);
+                try {
+                    localStorage.setItem('homeownershipNotes', JSON.stringify(notes)); // Use a specific key
+                } catch (e) {
+                    console.error("Failed to save note:", e);
+                }
+
+                renderNotes();
+                noteTextArea.value = '';
+            } else {
+                alert('Please enter a note before saving.');
+            }
+        }
+
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('homeownershipNotes'); // Use consistent key
+            notes = []; // Start fresh
+
+            if (savedNotes) {
+                try {
+                    const parsedNotes = JSON.parse(savedNotes);
+                    if (Array.isArray(parsedNotes)) {
+                        notes = parsedNotes;
+                    } else {
+                        console.warn("Stored notes data is not an array. Resetting.");
+                        localStorage.removeItem('homeownershipNotes');
+                    }
+                } catch (e) {
+                    console.error("Error parsing saved notes:", e);
+                    localStorage.removeItem('homeownershipNotes');
+                }
+            }
+
+            renderNotes();
+        }
+
+        // Update Chart Function
+        function updateChart(chartInstance, canvasId, chartLabel, labels, growthData, color) {
+            const ctx = document.getElementById(canvasId)?.getContext('2d');
+            if (!ctx) {
+                console.error(`Canvas context not found for ID: ${canvasId}`);
+                return null;
+            }
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim() || '#e2e8f0';
+            const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#718096';
+
+            return new Chart(ctx, {
+                type: 'line', // Or 'doughnut' for paymentChart
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: chartLabel,
+                        data: growthData,
+                        borderColor: color,
+                        backgroundColor: color + '33',
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: color,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                },
+                                color: tickColor
+                            },
+                            grid: {
+                                color: gridColor
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: tickColor
+                            },
+                            grid: {
+                                color: gridColor
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Help / Glossary Toggles & Filters
+        function toggleHelp() {
+            const helpSection = document.getElementById('helpSection');
+            if (helpSection) {
+                helpSection.classList.toggle('active');
+                // Close the other panel if open
+                document.getElementById('glossarySection')?.classList.remove('active');
+            } else {
+                console.error("Help section element not found");
+            }
+        }
+
+        function toggleGlossary() {
+            const glossarySection = document.getElementById('glossarySection');
+            if (glossarySection) {
+                glossarySection.classList.toggle('active');
+                // Close the other panel if open
+                document.getElementById('helpSection')?.classList.remove('active');
+            } else {
+                console.error("Glossary section element not found");
+            }
+        }
+
+        function filterFAQ() {
+            filterList('faqSearch', '#faqContent > .faq-item');
+        }
+
+        function filterGlossary() {
+            filterList('glossarySearch', '#glossaryContent > .glossary-item');
+        }
+
+        function filterList(inputId, itemSelector) {
+            const input = document.getElementById(inputId);
+            const searchTerm = input ? input.value.toLowerCase() : '';
+            const items = document.querySelectorAll(itemSelector);
+
+            if (!items.length) return; // Exit if no items found
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? "" : "none";
+            });
+        }
+
+
+
+        // Close panels when clicking outside
+        document.addEventListener('click', function(event) {
+            const helpSection = document.getElementById('helpSection');
+            const glossarySection = document.getElementById('glossarySection');
+            const helpButton = document.querySelector('.help-button'); // Target button in controls
+            const glossaryButton = document.querySelector('.glossary-button'); // Target button in controls
+            const glossaryButtonStage1 = document.querySelector('#stage1 .glossary-button'); // Target button in stage 1
+
+            // Check if the click target OR any of its parents match the buttons or panels
+            const isHelpButton = event.target === helpButton || helpButton?.contains(event.target);
+            const isGlossaryButton = (event.target === glossaryButton || glossaryButton?.contains(event.target)) ||
+                (event.target === glossaryButtonStage1 || glossaryButtonStage1?.contains(event.target));
+            const isClickInsideHelp = helpSection?.contains(event.target);
+            const isClickInsideGlossary = glossarySection?.contains(event.target);
+
+            // Close Help if click is outside Help panel AND not on a Help button
+            if (helpSection?.classList.contains('active') && !isClickInsideHelp && !isHelpButton) {
+                helpSection.classList.remove('active');
+            }
+            // Close Glossary if click is outside Glossary panel AND not on a Glossary button
+            if (glossarySection?.classList.contains('active') && !isClickInsideGlossary && !isGlossaryButton) {
+                glossarySection.classList.remove('active');
+            }
+        });
+
+        // Clears FAQ input on click and re-filters
+        document.getElementById('clearFaqBtn')?.addEventListener('click', () => {
+            document.getElementById('faqSearch').value = "";
+            filterFAQ();
+        });
+
+        // Clears Glossary input on click and re-filters
+        document.getElementById('clearGlossaryBtn')?.addEventListener('click', () => {
+            document.getElementById('glossarySearch').value = "";
+            filterGlossary();
+        });
+
+
+        // --- DOMContentLoaded Initializer ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM Loaded. Initializing Home Readiness Tool.");
+
+            // 1. Set Initial Theme
+            try {
+                const savedTheme = localStorage.getItem('theme') || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } catch (e) {
+                console.error("Could not access theme preference", e);
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+
+            // 2. Load Saved State (Includes initial showStage call)
+            loadState();
+
+            // 3. Load Saved Notes (if feature is used)
+            loadNotes();
+
+            // 4. Chart Initialization (Optional - they get created/updated on demand)
+            // Keep commented out unless needed for placeholders
+            /*
+            const emptyChartData = { labels: [''], datasets: [{ data: [] }] };
+            const docStyles = getComputedStyle(document.documentElement);
+            const initialPaymentColor = docStyles.getPropertyValue('--primary-color').trim();
+            const initialAmortColor = docStyles.getPropertyValue('--primary-color').trim();
+            // Using updateChart here might be redundant, specific functions handle drawing
+            // paymentChart = updateChart(paymentChart, 'paymentChart', 'Payment Breakdown', emptyChartData.labels, emptyChartData.datasets[0].data, initialPaymentColor);
+            // amortizationChart = updateChart(amortizationChart, 'amortizationChart', 'Loan Balance', emptyChartData.labels, emptyChartData.datasets[0].data, initialAmortColor);
+            */
+            const chartsContainer = document.getElementById('affordabilityCharts');
+            if (chartsContainer) chartsContainer.style.display = 'none'; // Ensure hidden
+
+            // 5. Attach Event Listeners
+            // Progress Steps
+            document.querySelectorAll('.progress-step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                if (!isNaN(stepNum)) {
+                    step.addEventListener('click', () => showStage(stepNum));
+                    step.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            showStage(stepNum);
+                        }
+                    });
+                }
+            });
+
+            // Top Controls Buttons
+            document.querySelector('.controls-area .pdf-export-btn')?.addEventListener('click', generatePDF);
+            document.querySelector('.controls-area .help-button')?.addEventListener('click', toggleHelp);
+            document.querySelector('.controls-area .glossary-button')?.addEventListener('click', toggleGlossary);
+            document.querySelector('.theme-toggle')?.addEventListener('click', toggleTheme);
+
+            // Side Panel Buttons
+            document.querySelector('#helpSection .close-button')?.addEventListener('click', toggleHelp);
+            document.querySelector('#glossarySection .close-button')?.addEventListener('click', toggleGlossary);
+            document.querySelector('#stage1 .glossary-button')?.addEventListener('click', toggleGlossary); // Glossary button within Stage 1
+
+            // Stage 1 Buttons
+            document.getElementById('checklistNextBtn')?.addEventListener('click', validateAndSubmitChecklist);
+            document.getElementById('checklistResetBtn')?.addEventListener('click', () => resetForm('checklistForm'));
+
+            // Stage 2 Buttons
+            document.getElementById('calculateAffordabilityBtn')?.addEventListener('click', validateAndCalculateAffordability);
+            document.getElementById('affordabilityBackBtn')?.addEventListener('click', () => showStage(1));
+            document.getElementById('affordabilityResetBtn')?.addEventListener('click', () => resetForm('affordabilityForm'));
+            // Note: Stage 2 Next button listener is added dynamically in calculateAffordability
+
+            // Stage 3 Buttons
+            document.getElementById('loanQuizNextBtn')?.addEventListener('click', validateAndDetermineLoan); // This submits the form
+            document.getElementById('loanQuizBackBtn')?.addEventListener('click', () => showStage(2));
+            document.getElementById('loanQuizResetBtn')?.addEventListener('click', () => resetForm('loanForm'));
+            // Note: Stage 3 Next button listener is added dynamically in determineLoan
+
+            // Stage 4 Buttons
+            document.getElementById('summaryExportBtn')?.addEventListener('click', generatePDF);
+            document.getElementById('summaryBackBtn')?.addEventListener('click', () => showStage(3));
+
+            // Sidebar Button
+            document.getElementById('saveDraftBtn')?.addEventListener('click', saveDraft);
+
+            // Search/Filter Inputs
+            document.getElementById('faqSearch')?.addEventListener('input', filterFAQ);
+            document.getElementById('glossarySearch')?.addEventListener('input', filterGlossary);
+
+            // DTI Inputs (Debounced) - Ensure IDs match HTML
+            document.getElementById('monthlyIncome')?.addEventListener('input', debounce(calculateDTI, 400));
+            document.getElementById('monthlyDebt')?.addEventListener('input', debounce(calculateDTI, 400));
+
+            // Back to Top Button
+            const backToTopButtonInstance = document.getElementById('back-to-top');
+            if (backToTopButtonInstance) {
+                window.addEventListener('scroll', () => {
+                    backToTopButtonInstance.classList.toggle('visible', window.scrollY > 300);
+                });
+                backToTopButtonInstance.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+
+            console.log("Home Readiness Tool Initialized. Current theme:", document.documentElement.getAttribute('data-theme'));
+        });
+    </script>
+</body>
+
+</html>
